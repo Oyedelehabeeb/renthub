@@ -1,9 +1,11 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { signOut } from "../services/apiAuth";
+import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../features/authentication/useUser";
 
 export default function Header() {
   const { user } = useUser();
+  const navigate = useNavigate();
   return (
     <header className="fixed top-0 left-0 w-full bg-white shadow z-50 h-16 flex items-center justify-between px-8">
       {/* Logo */}
@@ -27,11 +29,25 @@ export default function Header() {
       </nav>
       {/* User Info or Sign In Button */}
       {user && user.user_metadata?.fullName ? (
-        <div className="flex items-center gap-2">
-          <img src={user.user_metadata.avatar} alt="avatar" />
-          <span className="font-medium text-gray-700">
-            {user.user_metadata.fullName}
-          </span>
+        <div className="flex items-center gap-3">
+          <img
+            src={user.user_metadata.avatar}
+            alt="avatar"
+            className="w-8 h-8 rounded-full object-cover"
+          />
+          <button
+            className="bg-gray-100 text-gray-700 px-3 py-1 rounded hover:bg-gray-200 border border-gray-300 transition"
+            onClick={async () => {
+              try {
+                await signOut();
+                navigate("/")
+              } catch (err) {
+                alert("Sign out failed");
+              }
+            }}
+          >
+            Sign Out
+          </button>
         </div>
       ) : (
         <div>

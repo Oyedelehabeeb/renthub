@@ -8,6 +8,7 @@ import BrowsePage from "./pages/BrowsePage";
 import ContactPage from "./pages/ContactPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
+import ListItemPage from "./pages/ListItemPage";
 
 export default function App() {
   const queryClient = new QueryClient()
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/booking" element={<BookingPage />} />
         <Route path="/browse" element={<BrowsePage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/list-item" element={<ListItemPage />} />
       </Route>
     </Routes>
     </BrowserRouter>
