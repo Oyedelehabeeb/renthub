@@ -12,6 +12,7 @@ export default function Header() {
       <nav className="flex gap-6">
         <Link to="/" className="hover:text-blue-600 font-medium">Home</Link>
         <Link to="/browse" className="hover:text-blue-600 font-medium">Browse</Link>
+        <Link to="/booking" className="hover:text-blue-600 font-medium">Booking</Link>
         <Link to="/contact" className="hover:text-blue-600 font-medium">Contact</Link>
       </nav>
       {/* Sign In Button */}
