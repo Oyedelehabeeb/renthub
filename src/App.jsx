@@ -6,6 +6,8 @@ import { Toaster } from "react-hot-toast";
 import BookingPage from "./pages/BookingPage";
 import BrowsePage from "./pages/BrowsePage";
 import ContactPage from "./pages/ContactPage";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
 
 export default function App() {
   const queryClient = new QueryClient()
@@ -13,6 +15,8 @@ export default function App() {
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
     <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/booking" element={<BookingPage />} />
