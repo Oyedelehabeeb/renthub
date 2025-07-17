@@ -4,6 +4,7 @@ import HomePage from "./pages/HomePage";
 import AppLayout from "./components/AppLayout";
 import { Toaster } from "react-hot-toast";
 import BookingPage from "./pages/BookingPage";
+import ItemPage from "./pages/ItemPage";
 import BrowsePage from "./pages/BrowsePage";
 import ContactPage from "./pages/ContactPage";
 import LoginPage from "./pages/LoginPage";
@@ -11,23 +12,24 @@ import SignupPage from "./pages/SignupPage";
 import ListItemPage from "./pages/ListItemPage";
 
 export default function App() {
-  const queryClient = new QueryClient()
+  const queryClient = new QueryClient();
   return (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<SignupPage />} />
-      <Route element={<AppLayout />}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/booking" element={<BookingPage />} />
-        <Route path="/browse" element={<BrowsePage />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/list-item" element={<ListItemPage />} />
-      </Route>
-    </Routes>
-    </BrowserRouter>
-    <Toaster
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/booking" element={<BookingPage />} />
+            <Route path="/item/:id" element={<ItemPage />} />
+            <Route path="/browse" element={<BrowsePage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/list-item" element={<ListItemPage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+      <Toaster
         position="top-center"
         gutter={12}
         containerStyle={{ margin: "8px" }}
@@ -47,6 +49,6 @@ export default function App() {
           },
         }}
       />
-  </QueryClientProvider>
-  )
+    </QueryClientProvider>
+  );
 }
