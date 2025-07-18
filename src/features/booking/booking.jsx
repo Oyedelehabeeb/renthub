@@ -137,7 +137,7 @@ export default function Booking({ item }) {
               disabled={isLoading}
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl font-bold text-xl hover:scale-[1.02] transition"
             >
-              {isLoading ? "Booking..." : "Book Now"}
+              {isLoading ? "Booking..." : "Book now"}
             </button>
           </form>
         </div>

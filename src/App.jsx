@@ -10,6 +10,7 @@ import ContactPage from "./pages/ContactPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import ListItemPage from "./pages/ListItemPage";
+import AdminPages from "./pages/AdminPages";
 
 export default function App() {
   const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ export default function App() {
             <Route path="/browse" element={<BrowsePage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/list-item" element={<ListItemPage />} />
+            <Route path="/admin" element={<AdminPages />} />
           </Route>
         </Routes>
       </BrowserRouter>
