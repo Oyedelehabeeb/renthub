@@ -8,6 +8,15 @@ import {
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Badge } from "../../components/ui/badge";
+import { useNavigate, Link } from "react-router-dom";
+import {
+  useAdminCheck,
+  useBookings,
+  useBookingStats,
+  useMonthlyStats,
+  useUpdateBookingStatus,
+} from "./useAdmin";
+import { useUnreadNotificationCount } from "../notifications/useNotification";
 // Table components using built-in HTML elements with styling
 import {
   Dialog,
@@ -28,109 +37,111 @@ import {
   Mail,
   Clock,
   CreditCard,
+  Bell,
 } from "lucide-react";
 
-// Sample data for demonstration
-const sampleBookings = [
-  {
-    id: "BK001",
-    item: {
-      name: "Professional Camera Kit",
-      location: "Downtown Studio",
-      price: 150,
-      image: "/placeholder.svg?height=40&width=40",
-    },
-    renter: {
-      full_name: "John Doe",
-      email: "john.doe@email.com",
-      phone: "+1 (555) 123-4567",
-    },
-    start_date: "2024-07-20",
-    end_date: "2024-07-25",
-    status: "confirmed",
-    total_price: 750,
-    created_at: "2024-07-15T10:30:00Z",
-    payment_method: "Credit Card",
-    special_requests: "Need delivery to hotel",
-  },
-  {
-    id: "BK002",
-    item: {
-      name: "DJ Equipment Set",
-      location: "Music District",
-      price: 200,
-      image: "/placeholder.svg?height=40&width=40",
-    },
-    renter: {
-      full_name: "Sarah Johnson",
-      email: "sarah.j@email.com",
-      phone: "+1 (555) 987-6543",
-    },
-    start_date: "2024-07-22",
-    end_date: "2024-07-23",
-    status: "completed",
-    total_price: 400,
-    created_at: "2024-07-10T14:15:00Z",
-    payment_method: "PayPal",
-    special_requests: null,
-  },
-  {
-    id: "BK003",
-    item: {
-      name: "Wedding Decoration Package",
-      location: "Event Center",
-      price: 300,
-      image: "/placeholder.svg?height=40&width=40",
-    },
-    renter: {
-      full_name: "Mike Chen",
-      email: "mike.chen@email.com",
-      phone: "+1 (555) 456-7890",
-    },
-    start_date: "2024-07-28",
-    end_date: "2024-07-29",
-    status: "pending",
-    total_price: 600,
-    created_at: "2024-07-16T09:20:00Z",
-    payment_method: "Bank Transfer",
-    special_requests: "Setup assistance required",
-  },
-];
+// Type definitions for improved code organization
+const statusColors = {
+  confirmed: "bg-green-500/20 text-green-400 border-green-500/30",
+  active: "bg-green-500/20 text-green-400 border-green-500/30",
+  completed: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+  pending: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+  cancelled: "bg-red-500/20 text-red-400 border-red-500/30",
+  rejected: "bg-red-500/20 text-red-400 border-red-500/30",
+};
 
-// Monthly data processing
-const processMonthlyData = (bookings) => {
-  const monthlyData = {};
-
-  bookings.forEach((booking) => {
-    const month = new Date(booking.start_date).toLocaleDateString("en-US", {
-      month: "short",
-    });
-    if (!monthlyData[month]) {
-      monthlyData[month] = { count: 0, revenue: 0 };
-    }
-    monthlyData[month].count += 1;
-    monthlyData[month].revenue += booking.total_price;
-  });
-
-  return Object.entries(monthlyData).map(([month, data]) => ({
-    month,
-    count: data.count,
-    revenue: data.revenue,
-  }));
+// Helper function for getting status colors
+const getStatusColor = (status) => {
+  return (
+    statusColors[status.toLowerCase()] ||
+    "bg-gray-500/20 text-gray-400 border-gray-500/30"
+  );
 };
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [sortConfig, setSortConfig] = useState({
+    key: "created_at",
+    direction: "desc",
+  });
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [dateRange, setDateRange] = useState({ start: null, end: null });
+  const { mutate: updateBookingStatus } = useUpdateBookingStatus();
+  const { data: unreadNotificationCount = 0 } = useUnreadNotificationCount();
 
-  const bookings = sampleBookings;
-  const bookingsByMonth = processMonthlyData(bookings);
-  const maxMonthCount = Math.max(...bookingsByMonth.map((item) => item.count));
-  const maxMonthRevenue = Math.max(
-    ...bookingsByMonth.map((item) => item.revenue)
-  );
+  // Check if user is admin
+  const { isLoading: isCheckingAdmin, isError: isAdminError } = useAdminCheck();
 
-  const filteredBookings = bookings.filter(
+  // Fetch data using React Query with pagination
+  const {
+    data: bookingsData = {
+      bookings: [],
+      totalCount: 0,
+      currentPage: 1,
+      totalPages: 1,
+    },
+    isLoading: isLoadingBookings,
+  } = useBookings({
+    page: currentPage,
+    limit: itemsPerPage,
+    sortBy: sortConfig.key,
+    sortOrder: sortConfig.direction,
+    dateRange,
+    status: filterStatus === "all" ? null : filterStatus,
+  });
+
+  const {
+    data: stats = {
+      totalBookings: 0,
+      activeBookings: 0,
+      pendingBookings: 0,
+      totalRevenue: 0,
+    },
+    isLoading: isLoadingStats,
+  } = useBookingStats();
+  const { data: monthlyStats = [], isLoading: isLoadingMonthly } =
+    useMonthlyStats();
+
+  // If not admin, redirect to home and log the error
+  if (isAdminError) {
+    console.error("Admin check failed");
+    navigate("/");
+    return null;
+  }
+
+  // Add error boundary for data loading
+  if (isLoadingBookings || isLoadingStats || isLoadingMonthly) {
+    console.log("Loading data...");
+    return (
+      <div className="min-h-screen bg-gray-950 p-6 flex items-center justify-center">
+        <p className="text-white">Loading dashboard data...</p>
+      </div>
+    );
+  }
+
+  if (!bookingsData?.bookings || !stats || !monthlyStats) {
+    console.error("Data not available:", { bookingsData, stats, monthlyStats });
+    return (
+      <div className="min-h-screen bg-gray-950 p-6 flex items-center justify-center">
+        <p className="text-red-400">
+          Error loading dashboard data. Please try again.
+        </p>
+      </div>
+    );
+  }
+
+  // Loading state
+  const isLoading =
+    isCheckingAdmin || isLoadingBookings || isLoadingStats || isLoadingMonthly;
+
+  const maxMonthCount = Math.max(...monthlyStats.map((item) => item.count));
+  const maxMonthRevenue = Math.max(...monthlyStats.map((item) => item.revenue));
+
+  const filteredBookings = bookingsData.bookings.filter(
     (booking) =>
       booking.item?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       booking.renter?.full_name
@@ -139,19 +150,13 @@ const AdminDashboard = () => {
       booking.status.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "confirmed":
-      case "active":
-        return "bg-green-500/20 text-green-400 border-green-500/30";
-      case "completed":
-        return "bg-blue-500/20 text-blue-400 border-blue-500/30";
-      case "pending":
-        return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
-      default:
-        return "bg-red-500/20 text-red-400 border-red-500/30";
-    }
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-950 p-6 flex items-center justify-center">
+        <p className="text-white">Loading dashboard data...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 p-6">
@@ -162,8 +167,22 @@ const AdminDashboard = () => {
             <h1 className="text-3xl font-bold text-white">Booking Dashboard</h1>
             <p className="text-gray-400">Manage and track all your bookings</p>
           </div>
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <Link
+                to="/notifications"
+                className="text-gray-400 hover:text-white"
+              >
+                <Bell className="h-6 w-6" />
+                {unreadNotificationCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {unreadNotificationCount}
+                  </span>
+                )}
+              </Link>
+            </div>
+          </div>
         </div>
-
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="bg-gray-900/50 border-gray-700">
@@ -174,7 +193,7 @@ const AdminDashboard = () => {
                     Total Bookings
                   </p>
                   <p className="text-2xl font-bold text-white">
-                    {bookings.length}
+                    {stats.totalBookings}
                   </p>
                 </div>
                 <Calendar className="h-8 w-8 text-blue-400" />
@@ -190,11 +209,7 @@ const AdminDashboard = () => {
                     Active Bookings
                   </p>
                   <p className="text-2xl font-bold text-white">
-                    {
-                      bookings.filter(
-                        (b) => b.status === "confirmed" || b.status === "active"
-                      ).length
-                    }
+                    {stats.activeBookings}
                   </p>
                 </div>
                 <Activity className="h-8 w-8 text-green-400" />
@@ -210,7 +225,7 @@ const AdminDashboard = () => {
                     Total Revenue
                   </p>
                   <p className="text-2xl font-bold text-white">
-                    ${bookings.reduce((sum, b) => sum + b.total_price, 0)}
+                    ${stats.totalRevenue.toFixed(2)}
                   </p>
                 </div>
                 <DollarSign className="h-8 w-8 text-yellow-400" />
@@ -224,7 +239,7 @@ const AdminDashboard = () => {
                 <div>
                   <p className="text-sm font-medium text-gray-400">Pending</p>
                   <p className="text-2xl font-bold text-white">
-                    {bookings.filter((b) => b.status === "pending").length}
+                    {stats.pendingBookings}
                   </p>
                 </div>
                 <Clock className="h-8 w-8 text-orange-400" />
@@ -232,7 +247,6 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
         </div>
-
         {/* Monthly Trends */}
         <Card className="bg-gray-900/50 border-gray-700 lg:col-span-2">
           <CardHeader>
@@ -254,7 +268,7 @@ const AdminDashboard = () => {
                 </div>
                 <div className="relative h-20 bg-gray-800 rounded-lg p-4">
                   <div className="flex items-end justify-between h-full">
-                    {bookingsByMonth.map((item, index) => {
+                    {monthlyStats.map((item, index) => {
                       const height =
                         maxMonthCount > 0
                           ? (item.count / maxMonthCount) * 100
@@ -294,7 +308,7 @@ const AdminDashboard = () => {
                 </div>
                 <div className="relative h-20 bg-gray-800 rounded-lg p-4">
                   <div className="flex items-end justify-between h-full">
-                    {bookingsByMonth.map((item, index) => {
+                    {monthlyStats.map((item, index) => {
                       const height =
                         maxMonthRevenue > 0
                           ? (item.revenue / maxMonthRevenue) * 100
@@ -325,15 +339,14 @@ const AdminDashboard = () => {
             </div>
           </CardContent>
         </Card>
-
         {/* Bookings Data Table */}
         <Card className="bg-gray-900/50 border-gray-700">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Calendar className="w-5 h-5" />
-              All Bookings ({bookings.length})
+              All Bookings ({bookingsData.totalCount})
             </CardTitle>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center justify-between gap-4">
               <div className="relative flex-1 max-w-sm">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
@@ -343,6 +356,36 @@ const AdminDashboard = () => {
                   className="pl-10 bg-gray-800 border-gray-700 text-white"
                 />
               </div>
+              <div className="flex gap-3">
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="bg-gray-800 border border-gray-700 rounded-md px-3 py-1.5 text-sm text-white"
+                >
+                  <option value="all">All Status</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="active">Active</option>
+                  <option value="completed">Completed</option>
+                  <option value="pending">Pending</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+                <Input
+                  type="date"
+                  value={dateRange.start || ""}
+                  onChange={(e) =>
+                    setDateRange((prev) => ({ ...prev, start: e.target.value }))
+                  }
+                  className="bg-gray-800 border-gray-700 text-white w-auto"
+                />
+                <Input
+                  type="date"
+                  value={dateRange.end || ""}
+                  onChange={(e) =>
+                    setDateRange((prev) => ({ ...prev, end: e.target.value }))
+                  }
+                  className="bg-gray-800 border-gray-700 text-white w-auto"
+                />
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -350,20 +393,115 @@ const AdminDashboard = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-700 hover:bg-gray-800/50">
-                    <th className="text-left py-3 px-4 text-gray-300 font-medium">
-                      Item
+                    <th
+                      className="text-left py-3 px-4 text-gray-300 font-medium cursor-pointer"
+                      onClick={() =>
+                        setSortConfig({
+                          key: "item_name",
+                          direction:
+                            sortConfig.key === "item_name" &&
+                            sortConfig.direction === "asc"
+                              ? "desc"
+                              : "asc",
+                        })
+                      }
+                    >
+                      <div className="flex items-center gap-1">
+                        Item
+                        {sortConfig.key === "item_name" && (
+                          <span>
+                            {sortConfig.direction === "asc" ? "↑" : "↓"}
+                          </span>
+                        )}
+                      </div>
                     </th>
-                    <th className="text-left py-3 px-4 text-gray-300 font-medium">
-                      Renter
+                    <th
+                      className="text-left py-3 px-4 text-gray-300 font-medium cursor-pointer"
+                      onClick={() =>
+                        setSortConfig({
+                          key: "renter_name",
+                          direction:
+                            sortConfig.key === "renter_name" &&
+                            sortConfig.direction === "asc"
+                              ? "desc"
+                              : "asc",
+                        })
+                      }
+                    >
+                      <div className="flex items-center gap-1">
+                        Renter
+                        {sortConfig.key === "renter_name" && (
+                          <span>
+                            {sortConfig.direction === "asc" ? "↑" : "↓"}
+                          </span>
+                        )}
+                      </div>
                     </th>
-                    <th className="text-left py-3 px-4 text-gray-300 font-medium">
-                      Dates
+                    <th
+                      className="text-left py-3 px-4 text-gray-300 font-medium cursor-pointer"
+                      onClick={() =>
+                        setSortConfig({
+                          key: "start_date",
+                          direction:
+                            sortConfig.key === "start_date" &&
+                            sortConfig.direction === "asc"
+                              ? "desc"
+                              : "asc",
+                        })
+                      }
+                    >
+                      <div className="flex items-center gap-1">
+                        Dates
+                        {sortConfig.key === "start_date" && (
+                          <span>
+                            {sortConfig.direction === "asc" ? "↑" : "↓"}
+                          </span>
+                        )}
+                      </div>
                     </th>
-                    <th className="text-left py-3 px-4 text-gray-300 font-medium">
-                      Status
+                    <th
+                      className="text-left py-3 px-4 text-gray-300 font-medium cursor-pointer"
+                      onClick={() =>
+                        setSortConfig({
+                          key: "status",
+                          direction:
+                            sortConfig.key === "status" &&
+                            sortConfig.direction === "asc"
+                              ? "desc"
+                              : "asc",
+                        })
+                      }
+                    >
+                      <div className="flex items-center gap-1">
+                        Status
+                        {sortConfig.key === "status" && (
+                          <span>
+                            {sortConfig.direction === "asc" ? "↑" : "↓"}
+                          </span>
+                        )}
+                      </div>
                     </th>
-                    <th className="text-left py-3 px-4 text-gray-300 font-medium">
-                      Total
+                    <th
+                      className="text-left py-3 px-4 text-gray-300 font-medium cursor-pointer"
+                      onClick={() =>
+                        setSortConfig({
+                          key: "total_price",
+                          direction:
+                            sortConfig.key === "total_price" &&
+                            sortConfig.direction === "asc"
+                              ? "desc"
+                              : "asc",
+                        })
+                      }
+                    >
+                      <div className="flex items-center gap-1">
+                        Total
+                        {sortConfig.key === "total_price" && (
+                          <span>
+                            {sortConfig.direction === "asc" ? "↑" : "↓"}
+                          </span>
+                        )}
+                      </div>
                     </th>
                     <th className="text-left py-3 px-4 text-gray-300 font-medium">
                       Actions
@@ -371,80 +509,155 @@ const AdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredBookings.map((booking) => (
-                    <tr
-                      key={booking.id}
-                      className="border-b border-gray-700 hover:bg-gray-800/50"
-                    >
-                      <td className="py-3 px-4 text-gray-300">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-md overflow-hidden">
-                            <img
-                              src={
-                                booking.item?.image ||
-                                "/placeholder.svg?height=40&width=40"
-                              }
-                              alt={booking.item?.name || "Item"}
-                              className="w-full h-full object-cover"
-                            />
+                  {filteredBookings
+                    .slice(
+                      (currentPage - 1) * itemsPerPage,
+                      currentPage * itemsPerPage
+                    )
+                    .map((booking) => (
+                      <tr
+                        key={booking.id}
+                        className="border-b border-gray-700 hover:bg-gray-800/50"
+                      >
+                        <td className="py-3 px-4 text-gray-300">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-md overflow-hidden">
+                              <img
+                                src={
+                                  booking.item?.image ||
+                                  "/placeholder.svg?height=40&width=40"
+                                }
+                                alt={booking.item?.name || "Item"}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div>
+                              <div className="font-medium">
+                                {booking.item?.name}
+                              </div>
+                              <div className="text-sm text-gray-400">
+                                {booking.item?.location}
+                              </div>
+                            </div>
                           </div>
+                        </td>
+                        <td className="py-3 px-4 text-gray-300">
                           <div>
                             <div className="font-medium">
-                              {booking.item?.name}
+                              {booking.renter?.full_name}
                             </div>
                             <div className="text-sm text-gray-400">
-                              {booking.item?.location}
+                              {booking.renter?.email}
                             </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-gray-300">
-                        <div>
-                          <div className="font-medium">
-                            {booking.renter?.full_name}
+                        </td>
+                        <td className="py-3 px-4 text-gray-300">
+                          <div className="text-sm">
+                            <div>
+                              {new Date(
+                                booking.start_date
+                              ).toLocaleDateString()}
+                            </div>
+                            <div className="text-gray-400">
+                              to{" "}
+                              {new Date(booking.end_date).toLocaleDateString()}
+                            </div>
                           </div>
-                          <div className="text-sm text-gray-400">
-                            {booking.renter?.email}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-gray-300">
-                        <div className="text-sm">
-                          <div>
-                            {new Date(booking.start_date).toLocaleDateString()}
-                          </div>
-                          <div className="text-gray-400">
-                            to {new Date(booking.end_date).toLocaleDateString()}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <Badge className={getStatusColor(booking.status)}>
-                          {booking.status.charAt(0).toUpperCase() +
-                            booking.status.slice(1)}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-4 text-gray-300 font-medium">
-                        ${booking.total_price}
-                      </td>
-                      <td className="py-3 px-4">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelectedBooking(booking)}
-                          className="border-gray-600 text-gray-300 hover:bg-gray-800"
-                        >
-                          View Details
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="py-3 px-4">
+                          <Badge className={getStatusColor(booking.status)}>
+                            {booking.status.charAt(0).toUpperCase() +
+                              booking.status.slice(1)}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-4 text-gray-300 font-medium">
+                          ${booking.total_price}
+                        </td>
+                        <td className="py-3 px-4">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedBooking(booking)}
+                            className="border-gray-600 text-gray-300 hover:bg-gray-800"
+                          >
+                            View Details
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
+              <div className="mt-4 flex items-center justify-between px-4">
+                <div className="text-sm text-gray-400">
+                  Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
+                  {Math.min(
+                    currentPage * itemsPerPage,
+                    filteredBookings.length
+                  )}{" "}
+                  of {filteredBookings.length} bookings
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(1, prev - 1))
+                    }
+                    disabled={currentPage === 1}
+                    className="border-gray-600 text-gray-300 hover:bg-gray-800"
+                  >
+                    Previous
+                  </Button>
+                  <div className="flex items-center gap-2">
+                    {Array.from(
+                      {
+                        length: Math.ceil(
+                          filteredBookings.length / itemsPerPage
+                        ),
+                      },
+                      (_, i) => (
+                        <Button
+                          key={i + 1}
+                          variant={
+                            currentPage === i + 1 ? "default" : "outline"
+                          }
+                          size="sm"
+                          onClick={() => setCurrentPage(i + 1)}
+                          className={
+                            currentPage === i + 1
+                              ? "bg-blue-600 hover:bg-blue-700"
+                              : "border-gray-600 text-gray-300 hover:bg-gray-800"
+                          }
+                        >
+                          {i + 1}
+                        </Button>
+                      )
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setCurrentPage((prev) =>
+                        Math.min(
+                          Math.ceil(filteredBookings.length / itemsPerPage),
+                          prev + 1
+                        )
+                      )
+                    }
+                    disabled={
+                      currentPage ===
+                      Math.ceil(filteredBookings.length / itemsPerPage)
+                    }
+                    className="border-gray-600 text-gray-300 hover:bg-gray-800"
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
             </div>
           </CardContent>
-        </Card>
-
+        </Card>{" "}
         {/* Booking Details Modal */}
         {selectedBooking && (
           <Dialog
@@ -630,15 +843,95 @@ const AdminDashboard = () => {
                 )}
 
                 <div className="flex justify-end gap-3">
-                  <Button
-                    variant="outline"
-                    className="border-gray-600 text-gray-300 hover:bg-gray-800"
-                  >
-                    Edit Booking
-                  </Button>
-                  <Button className="bg-blue-600 hover:bg-blue-700">
-                    Contact Renter
-                  </Button>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex gap-2 items-center">
+                      <label className="text-sm text-gray-400">
+                        Update Status:
+                      </label>
+                      <select
+                        value={selectedBooking.status}
+                        onChange={(e) => {
+                          const newStatus = e.target.value;
+                          updateBookingStatus({
+                            bookingId: selectedBooking.id,
+                            status: newStatus,
+                          });
+                          setSelectedBooking((prev) => ({
+                            ...prev,
+                            status: newStatus,
+                          }));
+                        }}
+                        className="bg-gray-800 border border-gray-700 rounded-md px-3 py-1.5 text-sm text-white"
+                      >
+                        <option value="confirmed">Confirmed</option>
+                        <option value="active">Active</option>
+                        <option value="completed">Completed</option>
+                        <option value="pending">Pending</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="rejected">Rejected</option>
+                      </select>
+                    </div>
+                    <div className="flex gap-3 flex-wrap">
+                      {selectedBooking.status === "pending" && (
+                        <>
+                          <Button
+                            className="bg-green-600 hover:bg-green-700"
+                            onClick={() => {
+                              updateBookingStatus({
+                                bookingId: selectedBooking.id,
+                                status: "confirmed",
+                              });
+                              setSelectedBooking((prev) => ({
+                                ...prev,
+                                status: "confirmed",
+                              }));
+                            }}
+                          >
+                            Accept Booking
+                          </Button>
+                          <Button
+                            className="bg-red-600 hover:bg-red-700"
+                            onClick={() => {
+                              updateBookingStatus({
+                                bookingId: selectedBooking.id,
+                                status: "rejected",
+                              });
+                              setSelectedBooking((prev) => ({
+                                ...prev,
+                                status: "rejected",
+                              }));
+                            }}
+                          >
+                            Reject Booking
+                          </Button>
+                        </>
+                      )}
+
+                      <Button
+                        className="bg-red-600 hover:bg-red-700"
+                        onClick={() => {
+                          updateBookingStatus({
+                            bookingId: selectedBooking.id,
+                            status: "cancelled",
+                          });
+                          setSelectedBooking((prev) => ({
+                            ...prev,
+                            status: "cancelled",
+                          }));
+                        }}
+                        disabled={
+                          selectedBooking.status === "cancelled" ||
+                          selectedBooking.status === "completed" ||
+                          selectedBooking.status === "rejected"
+                        }
+                      >
+                        Cancel Booking
+                      </Button>
+                      <Button className="bg-blue-600 hover:bg-blue-700">
+                        Contact Renter
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </DialogContent>

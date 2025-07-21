@@ -37,6 +37,12 @@ export default function Booking({ item }) {
       toast.error("Invalid user ID (not a UUID)");
       return;
     }
+
+    // Check if user is trying to book their own item
+    if (user.id === item.owner_id) {
+      toast.error("You cannot book your own item!");
+      return;
+    }
     const serviceCharge = Math.round(item.price * SERVICE_CHARGE_RATE);
     const total_price = item.price + serviceCharge;
     createBooking(

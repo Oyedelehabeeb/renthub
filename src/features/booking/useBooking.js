@@ -1,14 +1,22 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createBooking,
   getBookingsByRenter,
   getBookingsByItem,
   getBooking,
+  updateBookingStatus,
 } from "../../services/apiBooking";
 
 export function useCreateBooking() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: createBooking,
+    onSuccess: () => {
+      // Invalidate queries that might be affected by this booking
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["unreadNotificationCount"] });
+    },
   });
 }
 
@@ -33,5 +41,19 @@ export function useBooking(id) {
     queryKey: ["booking", id],
     queryFn: () => getBooking(id),
     enabled: !!id,
+  });
+}
+
+export function useUpdateBookingStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ bookingId, status }) =>
+      updateBookingStatus(bookingId, status),
+    onSuccess: () => {
+      // Invalidate queries that might be affected by this status update
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["unreadNotificationCount"] });
+    },
   });
 }

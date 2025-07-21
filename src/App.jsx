@@ -1,9 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import HomePage from "./pages/HomePage";
-import AppLayout from "./components/AppLayout";
+
 import { Toaster } from "react-hot-toast";
+import AppLayout from "./components/AppLayout";
 import BookingPage from "./pages/BookingPage";
+import BookingDetailPage from "./pages/BookingDetailPage";
 import ItemPage from "./pages/ItemPage";
 import BrowsePage from "./pages/BrowsePage";
 import ContactPage from "./pages/ContactPage";
@@ -11,6 +13,8 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import ListItemPage from "./pages/ListItemPage";
 import AdminPages from "./pages/AdminPages";
+import NotificationsPage from "./pages/NotificationsPage";
+import NotificationTester from "./components/NotificationTester";
 
 export default function App() {
   const queryClient = new QueryClient();
@@ -28,6 +32,12 @@ export default function App() {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/list-item" element={<ListItemPage />} />
             <Route path="/admin" element={<AdminPages />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/bookings/:id" element={<BookingDetailPage />} />
+            <Route
+              path="/debug-notifications"
+              element={<NotificationTester />}
+            />
           </Route>
         </Routes>
       </BrowserRouter>
