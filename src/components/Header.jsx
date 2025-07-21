@@ -28,6 +28,9 @@ export default function Header() {
         <Link to="/booking" className="hover:text-blue-600 font-medium">
           Booking
         </Link>
+        <Link to="/about" className="hover:text-blue-600 font-medium">
+          About
+        </Link>
         <Link to="/contact" className="hover:text-blue-600 font-medium">
           Contact
         </Link>
@@ -38,7 +41,27 @@ export default function Header() {
           {/* Notification Bell */}
           <NotificationBell />
 
-         <span>{user?.user_metadata?.fullName}</span>
+          {/* Profile Link */}
+          <Link
+            to="/profile"
+            className="flex items-center gap-2 hover:text-blue-500 transition-colors"
+          >
+            <div className="w-8 h-8 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center">
+              {user.user_metadata?.avatar ? (
+                <img
+                  src={user.user_metadata.avatar}
+                  alt={user.user_metadata.fullName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-gray-600 font-medium">
+                  {user.user_metadata?.fullName.charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+            <span>{user?.user_metadata?.fullName}</span>
+          </Link>
+
           <button
             className="bg-gray-100 text-gray-700 px-3 py-1 rounded hover:bg-gray-200 border border-gray-300 transition"
             onClick={async () => {
@@ -56,9 +79,11 @@ export default function Header() {
         </div>
       ) : (
         <div>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-            Sign In
-          </button>
+          <Link to="/login">
+            <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+              Sign In
+            </button>
+          </Link>
         </div>
       )}
     </header>

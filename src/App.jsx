@@ -9,12 +9,14 @@ import BookingDetailPage from "./pages/BookingDetailPage";
 import ItemPage from "./pages/ItemPage";
 import BrowsePage from "./pages/BrowsePage";
 import ContactPage from "./pages/ContactPage";
+import AboutPage from "./pages/AboutPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import ListItemPage from "./pages/ListItemPage";
 import AdminPages from "./pages/AdminPages";
 import NotificationsPage from "./pages/NotificationsPage";
 import NotificationTester from "./components/NotificationTester";
+import ProfilePage from "./pages/ProfilePage";
 
 export default function App() {
   const queryClient = new QueryClient();
@@ -30,10 +32,12 @@ export default function App() {
             <Route path="/item/:id" element={<ItemPage />} />
             <Route path="/browse" element={<BrowsePage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/about" element={<AboutPage />} />
             <Route path="/list-item" element={<ListItemPage />} />
             <Route path="/admin" element={<AdminPages />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/bookings/:id" element={<BookingDetailPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route
               path="/debug-notifications"
               element={<NotificationTester />}
