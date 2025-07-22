@@ -109,7 +109,7 @@ export default function Booking({ item }) {
                 </div>
               </div>
             </div>
-
+            
             <div className="bg-gray-800 p-5 rounded-xl border border-gray-700">
               <label className="block mb-3 font-medium text-gray-200 text-base">
                 Quantity
@@ -128,20 +128,18 @@ export default function Booking({ item }) {
               )}
             </div>
           </div>
-
+          
           {/* Order Summary and Booking - Right Side */}
           <div className="lg:w-5/12">
             <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 sticky top-24">
               <h4 className="font-bold text-xl text-white mb-6 border-b border-gray-700 pb-4">
                 Order Summary
               </h4>
-
+              
               <div className="space-y-5">
                 <div className="flex justify-between text-base">
                   <span className="text-gray-400">Item Price:</span>
-                  <span className="font-semibold text-white">
-                    ₦{item.price}
-                  </span>
+                  <span className="font-semibold text-white">₦{item.price}</span>
                 </div>
                 <div className="flex justify-between text-base">
                   <span className="text-gray-400">Service Charge (10%):</span>
@@ -155,7 +153,7 @@ export default function Booking({ item }) {
                     ₦{item.price + Math.round(item.price * SERVICE_CHARGE_RATE)}
                   </span>
                 </div>
-
+                
                 <div className="pt-4">
                   <button
                     type="submit"
@@ -164,7 +162,7 @@ export default function Booking({ item }) {
                   >
                     {isLoading ? "Processing..." : "Book Now"}
                   </button>
-
+                  
                   {!user && (
                     <p className="text-red-400 text-center text-sm mt-3">
                       You must be signed in to book this item

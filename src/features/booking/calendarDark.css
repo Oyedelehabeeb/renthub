@@ -1,0 +1,107 @@
+/* Dark theme styles for React Date Range Calendar */
+.calendar-dark {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+  color: white !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5) !important;
+  max-width: 100% !important; /* Ensure calendar doesn't overflow */
+}
+
+/* Month and Year Header */
+.calendar-dark .rdrMonthAndYearWrapper {
+  background-color: #1f2937 !important;
+  padding: 10px !important;
+}
+
+.calendar-dark .rdrMonthAndYearPickers select {
+  color: #f3f4f6 !important;
+  background-color: #374151 !important;
+  padding: 5px 10px !important;
+  border-radius: 6px !important;
+  border: 1px solid #4b5563 !important;
+}
+
+.calendar-dark .rdrMonth {
+  background-color: #1f2937 !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+/* Day number styling */
+.calendar-dark .rdrDayNumber span {
+  color: #f3f4f6 !important;
+}
+
+.calendar-dark .rdrDay:hover {
+  background-color: #374151 !important;
+  border-radius: 8px !important;
+}
+
+/* Disabled days */
+.calendar-dark .rdrDayDisabled {
+  background-color: #111827 !important;
+}
+
+.calendar-dark .rdrDayDisabled .rdrDayNumber span {
+  color: #6b7280 !important;
+}
+
+/* Header styling */
+.calendar-dark .rdrMonthName {
+  color: #93c5fd !important;
+  font-weight: 600 !important;
+  padding: 5px 0 !important;
+}
+
+.calendar-dark .rdrWeekDay {
+  color: #93c5fd !important;
+  font-weight: 600 !important;
+}
+
+/* Selected day styling */
+.calendar-dark .rdrDayToday .rdrDayNumber span:after {
+  background: #6366f1 !important;
+}
+
+.calendar-dark .rdrDayStartPreview,
+.calendar-dark .rdrDayEndPreview,
+.calendar-dark .rdrDayInPreview {
+  color: #93c5fd !important;
+}
+
+.calendar-dark .rdrStartEdge,
+.calendar-dark .rdrEndEdge,
+.calendar-dark .rdrInRange {
+  border-radius: 0 !important;
+  background: rgba(99, 102, 241, 0.4) !important;
+}
+
+.calendar-dark .rdrStartEdge {
+  border-top-left-radius: 8px !important;
+  border-bottom-left-radius: 8px !important;
+}
+
+.calendar-dark .rdrEndEdge {
+  border-top-right-radius: 8px !important;
+  border-bottom-right-radius: 8px !important;
+}
+
+/* Navigation buttons */
+.calendar-dark .rdrPprevButton i {
+  border-color: transparent #f3f4f6 transparent transparent !important;
+}
+
+.calendar-dark .rdrNextButton i {
+  border-color: transparent transparent transparent #f3f4f6 !important;
+}
+
+/* Responsive styles for small screens */
+@media (max-width: 640px) {
+  .calendar-dark .rdrMonth {
+    padding: 0 !important;
+  }
+
+  .calendar-dark .rdrDay {
+    height: 2.5em !important;
+  }
+}
