@@ -1,10 +1,7 @@
 /* eslint-disable react/prop-types */
-import { motion } from "framer-motion"
-import { Search } from "lucide-react"
-import { Link } from "react-router-dom"
-// ...existing code...
-
-// ...existing code...
+import { motion } from "framer-motion";
+import { Search } from "lucide-react";
+import { Link } from "react-router-dom";
 
 function ElegantShape({
   className,
@@ -14,7 +11,6 @@ function ElegantShape({
   rotate = 0,
   gradient = "from-white/[0.08]",
 }) {
-  
   return (
     <motion.div
       initial={{
@@ -55,12 +51,8 @@ function ElegantShape({
         />
       </motion.div>
     </motion.div>
-  )
+  );
 }
-
-
-// ...existing code...
-
 
 export default function HeroGeometric() {
   const fadeUpVariants = {
@@ -74,7 +66,7 @@ export default function HeroGeometric() {
         ease: [0.25, 0.4, 0.25, 1],
       },
     }),
-  }
+  };
 
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-[#030303]">
@@ -142,7 +134,12 @@ export default function HeroGeometric() {
             <span className="text-sm text-white/60 tracking-wide">RentHub</span>
           </motion.div>
 
-          <motion.div custom={1} variants={fadeUpVariants} initial="hidden" animate="visible">
+          <motion.div
+            custom={1}
+            variants={fadeUpVariants}
+            initial="hidden"
+            animate="visible"
+          >
             <h1 className="text-4xl sm:text-6xl md:text-8xl font-bold mb-6 md:mb-8 tracking-tight">
               <span className="bg-clip-text text-transparent bg-gradient-to-b from-white to-white/80">
                 Rent Everything
@@ -154,13 +151,24 @@ export default function HeroGeometric() {
             </h1>
           </motion.div>
 
-          <motion.div custom={2} variants={fadeUpVariants} initial="hidden" animate="visible">
+          <motion.div
+            custom={2}
+            variants={fadeUpVariants}
+            initial="hidden"
+            animate="visible"
+          >
             <p className="text-base sm:text-lg md:text-xl text-white/40 mb-12 leading-relaxed font-light tracking-wide max-w-2xl mx-auto px-4">
-              From professional equipment to everyday essentials. Quality items, trusted owners, seamless experience.
+              From professional equipment to everyday essentials. Quality items,
+              trusted owners, seamless experience.
             </p>
           </motion.div>
 
-          <motion.div custom={3} variants={fadeUpVariants} initial="hidden" animate="visible">
+          <motion.div
+            custom={3}
+            variants={fadeUpVariants}
+            initial="hidden"
+            animate="visible"
+          >
             <div className="max-w-2xl mx-auto mb-8">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur-xl"></div>
@@ -175,9 +183,7 @@ export default function HeroGeometric() {
                       />
                     </div>
                     <Link href="/browse">
-                      <button
-                        className="h-14 px-8 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-0"
-                      >
+                      <button className="h-14 px-8 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-0">
                         Search Items
                       </button>
                     </Link>
@@ -187,19 +193,20 @@ export default function HeroGeometric() {
             </div>
           </motion.div>
 
-          <motion.div custom={4} variants={fadeUpVariants} initial="hidden" animate="visible">
+          <motion.div
+            custom={4}
+            variants={fadeUpVariants}
+            initial="hidden"
+            animate="visible"
+          >
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/browse">
-                <button
-                  className="h-12 px-8 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-xl transition-all duration-300 border-0"
-                >
+                <button className="h-12 px-8 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-xl transition-all duration-300 border-0">
                   Start Browsing
                 </button>
               </Link>
-              <Link href="/auth/signup">
-                <button
-                  className="h-12 px-8 border border-white/[0.08] bg-white/[0.03] text-white/80 hover:bg-white/[0.08] font-medium rounded-xl backdrop-blur-sm transition-all duration-300"
-                >
+              <Link to="list-item">
+                <button className="h-12 px-8 border border-white/[0.08] bg-white/[0.03] text-white/80 hover:bg-white/[0.08] font-medium rounded-xl backdrop-blur-sm transition-all duration-300">
                   List Your Items
                 </button>
               </Link>
@@ -210,5 +217,5 @@ export default function HeroGeometric() {
 
       <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-transparent to-[#030303]/80 pointer-events-none" />
     </div>
-  )
+  );
 }

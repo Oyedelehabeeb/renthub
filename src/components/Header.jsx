@@ -20,14 +20,16 @@ export default function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 w-full bg-white shadow z-50 h-16 flex items-center justify-between px-4 md:px-8">
+    <header className="fixed top-0 left-0 w-full bg-gray-900 shadow z-50 h-16 flex items-center justify-between px-4 md:px-8">
       {/* Logo */}
-      <div className="flex items-center">
-        <Link to="/">
-          <span className="font-bold text-xl text-blue-600">Renthub</span>
+      <div className="flex-shrink-0">
+        <Link href="/" className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+            <span className="text-white font-bold text-sm">R</span>
+          </div>
+          <span className="text-xl font-bold text-white">RentHub</span>
         </Link>
       </div>
-
       {/* Mobile Menu Toggle */}
       <button
         className="md:hidden text-gray-700 focus:outline-none"
@@ -42,16 +44,25 @@ export default function Header() {
 
       {/* Desktop Navigation */}
       <nav className="hidden md:flex gap-6">
-        <Link to="/" className="hover:text-blue-600 font-medium">
+        <Link to="/" className="text-white hover:text-blue-600 font-medium">
           Home
         </Link>
-        <Link to="/browse" className="hover:text-blue-600 font-medium">
+        <Link
+          to="/browse"
+          className="text-white hover:text-blue-600 font-medium"
+        >
           Browse
         </Link>
-        <Link to="/about" className="hover:text-blue-600 font-medium">
+        <Link
+          to="/about"
+          className="text-white hover:text-blue-600 font-medium"
+        >
           About
         </Link>
-        <Link to="/contact" className="hover:text-blue-600 font-medium">
+        <Link
+          to="/contact"
+          className="text-white hover:text-blue-600 font-medium"
+        >
           Contact
         </Link>
       </nav>
@@ -59,15 +70,22 @@ export default function Header() {
       <div className="hidden md:block">
         {user && user.user_metadata?.fullName ? (
           <div className="flex items-center gap-3">
-            {/* Notification Bell */}
-            <NotificationBell />
+            {/* Signout button */}
+
+            <button
+              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 px-3 py-1"
+              onClick={handleSignOut}
+              disabled={isSigningOut}
+            >
+              {isSigningOut ? "Signing out..." : "Sign Out"}
+            </button>
 
             {/* Profile Link */}
             <Link
               to="/profile"
               className="flex items-center gap-2 hover:text-blue-500 transition-colors"
             >
-              <div className="w-8 h-8 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full overflow-hidden flex items-center justify-center">
                 {user.user_metadata?.avatar ? (
                   <img
                     src={user.user_metadata.avatar}
@@ -75,28 +93,23 @@ export default function Header() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-gray-600 font-medium">
-                    {user.user_metadata?.fullName.charAt(0).toUpperCase()}
+                  <span className="font-medium">
+                    {user?.user_metadata?.fullName.charAt(0).toUpperCase()}
                   </span>
                 )}
               </div>
-              <span className="hidden sm:inline">
+              <span className="text-white hidden sm:inline">
                 {user?.user_metadata?.fullName}
               </span>
             </Link>
 
-            <button
-              className="bg-gray-100 text-gray-700 px-3 py-1 rounded hover:bg-gray-200 border border-gray-300 transition"
-              onClick={handleSignOut}
-              disabled={isSigningOut}
-            >
-              {isSigningOut ? "Signing out..." : "Sign Out"}
-            </button>
+            {/* Notification Bell */}
+            <NotificationBell />
           </div>
         ) : (
           <div>
             <Link to="/login">
-              <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+              <button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 px-3 py-1">
                 Sign In
               </button>
             </Link>
