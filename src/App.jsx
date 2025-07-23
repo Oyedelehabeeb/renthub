@@ -27,6 +27,9 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
           <Route
             element={
               <ProtectedRoute>
@@ -34,12 +37,9 @@ export default function App() {
               </ProtectedRoute>
             }
           >
-            <Route path="/" element={<HomePage />} />
             <Route path="/booking" element={<BookingPage />} />
             <Route path="/item/:id" element={<ItemPage />} />
             <Route path="/browse" element={<BrowsePage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/about" element={<AboutPage />} />
             <Route path="/list-item" element={<ListItemPage />} />
             <Route path="/admin" element={<AdminPages />} />
             <Route path="/notifications" element={<NotificationsPage />} />

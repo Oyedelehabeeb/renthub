@@ -3,10 +3,10 @@ import { useUser } from "../features/authentication/useUser";
 import { Link } from "react-router-dom";
 import NotificationBell from "../features/notifications/NotificationBell";
 import { useSignout } from "../features/authentication/useSignout";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ShieldCheck } from "lucide-react";
 
 export default function Header() {
-  const { user } = useUser();
+  const { user, isAdmin } = useUser();
   const { signOut, isSigningOut } = useSignout();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const handleToggleMenu = () => {
@@ -65,6 +65,15 @@ export default function Header() {
         >
           Contact
         </Link>
+        {isAdmin && (
+          <Link
+            to="/admin"
+            className="text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 font-medium flex items-center gap-1 px-3 py-1 rounded-xl"
+          >
+            <ShieldCheck className="w-4 h-4" />
+            Admin
+          </Link>
+        )}
       </nav>
       {/* Desktop User Info or Sign In Button */}
       <div className="hidden md:block">
@@ -151,6 +160,16 @@ export default function Header() {
               >
                 Contact
               </Link>
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  className="hover:text-blue-600 font-medium py-2 flex items-center gap-2 text-blue-600 bg-blue-50 rounded-md px-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  Admin Dashboard
+                </Link>
+              )}
             </nav>
 
             {/* Mobile User Controls */}

@@ -52,7 +52,22 @@ export async function getCurrentUser() {
 
   if (error) throw new Error(error.message);
 
-  return data?.user;
+  // Fetch admin status from profile table
+  const { data: profileData, error: profileError } = await supabase
+    .from("profile")
+    .select("is_admin")
+    .eq("id", data.user.id)
+    .single();
+
+  if (profileError) {
+    console.error("Error fetching user profile:", profileError);
+  }
+
+  // Attach admin status to user object
+  return {
+    ...data?.user,
+    is_admin: profileData?.is_admin || false,
+  };
 }
 
 export async function logout() {
