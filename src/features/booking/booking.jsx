@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { Calendar } from "react-date-range";
 import "react-date-range/dist/styles.css";
@@ -8,6 +8,8 @@ import "react-date-range/dist/theme/default.css";
 import "./calendarDark.css";
 import { useCreateBooking } from "./useBooking";
 import { useUser } from "../authentication/useUser";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../../lib/supabase";
 
 // Example: service charge is 10% of item price
 const SERVICE_CHARGE_RATE = 0.1;
@@ -16,13 +18,63 @@ export default function Booking({ item }) {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      quantity: 1,
+    },
+  });
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
+  const [bookedDates, setBookedDates] = useState([]);
+  const [isLoadingDates, setIsLoadingDates] = useState(true);
   const { user } = useUser();
   const { mutate: createBooking, isLoading } = useCreateBooking();
-  console.log(user);
+  const navigate = useNavigate();
+
+  // Watch the quantity field to update calculations in real-time
+  // const quantity = watch("quantity") || 1;
+
+  // Fetch existing bookings for this item to disable booked dates
+  useEffect(() => {
+    async function fetchBookedDates() {
+      if (!item?.id) return;
+
+      try {
+        setIsLoadingDates(true);
+        const { data, error } = await supabase
+          .from("bookings")
+          .select("start_date, end_date, status")
+          .eq("item_id", item.id)
+          .in("status", ["pending", "confirmed", "active"]);
+
+        if (error) throw error;
+
+        // Create an array of all booked dates
+        const bookedDateRanges = [];
+        data.forEach((booking) => {
+          const start = new Date(booking.start_date);
+          const end = new Date(booking.end_date);
+
+          // Add each date in the range to the booked dates array
+          const currentDate = new Date(start);
+          while (currentDate <= end) {
+            bookedDateRanges.push(new Date(currentDate));
+            currentDate.setDate(currentDate.getDate() + 1);
+          }
+        });
+
+        setBookedDates(bookedDateRanges);
+      } catch (err) {
+        console.error("Error fetching booked dates:", err);
+      } finally {
+        setIsLoadingDates(false);
+      }
+    }
+
+    fetchBookedDates();
+  }, [item?.id]);
 
   if (!item) return null;
 
@@ -44,8 +96,24 @@ export default function Booking({ item }) {
       toast.error("You cannot book your own item!");
       return;
     }
-    const serviceCharge = Math.round(item.price * SERVICE_CHARGE_RATE);
-    const total_price = item.price + serviceCharge;
+
+    // Get quantity from form data
+    const formData = watch();
+    const qty = parseInt(formData.quantity) || 1;
+
+    // Calculate rental duration in days
+    const startDay = new Date(startDate);
+    const endDay = new Date(endDate);
+    const days = Math.max(
+      1,
+      Math.ceil((endDay - startDay) / (1000 * 60 * 60 * 24))
+    );
+
+    // Calculate costs with quantity
+    const basePrice = item.price * qty * days;
+    const serviceCharge = Math.round(basePrice * SERVICE_CHARGE_RATE);
+    const total_price = basePrice + serviceCharge;
+
     createBooking(
       {
         item_id: item.id,
@@ -53,12 +121,42 @@ export default function Booking({ item }) {
         owner_id: item.owner_id,
         start_date: startDate.toISOString(),
         end_date: endDate.toISOString(),
+        quantity: qty,
         total_price,
         status: "pending",
       },
       {
-        onSuccess: () => {
-          toast.success(`Booking successful! Total: ₦${total_price}`);
+        onSuccess: (data) => {
+          toast.success(
+            `Booking successful! Redirecting to confirmation page...`
+          );
+          // Navigate to the success page with booking details
+          // Get form data
+          const formData = watch();
+          const qty = parseInt(formData.quantity) || 1;
+
+          // Calculate rental duration in days
+          const startDay = new Date(startDate);
+          const endDay = new Date(endDate);
+          const days = Math.max(
+            1,
+            Math.ceil((endDay - startDay) / (1000 * 60 * 60 * 24))
+          );
+
+          navigate("/booking-success", {
+            state: {
+              booking: {
+                ...data,
+                start_date: startDate.toISOString(),
+                end_date: endDate.toISOString(),
+                quantity: qty,
+                days: days,
+                item_price: item.price,
+                total_price,
+                item_name: item.name,
+              },
+            },
+          });
         },
         onError: (err) => {
           toast.error(
@@ -90,8 +188,15 @@ export default function Booking({ item }) {
                     color="#4f46e5"
                     className="rounded-lg shadow-lg calendar-dark w-full"
                     showDateDisplay={false}
+                    minDate={new Date()}
+                    disabledDates={bookedDates}
                   />
                 </div>
+                {isLoadingDates && (
+                  <p className="text-blue-400 text-sm text-center mt-2">
+                    Loading availability...
+                  </p>
+                )}
               </div>
               <div className="bg-gray-800 p-5 rounded-xl border border-gray-700">
                 <label className="block mb-3 font-medium text-gray-200 text-base">
@@ -105,6 +210,7 @@ export default function Booking({ item }) {
                     className="rounded-lg shadow-lg calendar-dark w-full"
                     minDate={startDate}
                     showDateDisplay={false}
+                    disabledDates={bookedDates}
                   />
                 </div>
               </div>
@@ -137,24 +243,59 @@ export default function Booking({ item }) {
               </h4>
 
               <div className="space-y-5">
-                <div className="flex justify-between text-base">
-                  <span className="text-gray-400">Item Price:</span>
-                  <span className="font-semibold text-white">
-                    ₦{item.price}
-                  </span>
-                </div>
-                <div className="flex justify-between text-base">
-                  <span className="text-gray-400">Service Charge (10%):</span>
-                  <span className="font-semibold text-blue-300">
-                    ₦{Math.round(item.price * SERVICE_CHARGE_RATE)}
-                  </span>
-                </div>
-                <div className="border-t border-gray-700 my-2 pt-4 flex justify-between font-bold text-xl">
-                  <span className="text-gray-300">Total:</span>
-                  <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                    ₦{item.price + Math.round(item.price * SERVICE_CHARGE_RATE)}
-                  </span>
-                </div>
+                {/* Calculate values based on quantity and duration */}
+                {(() => {
+                  const qty = parseInt(watch("quantity")) || 1;
+                  const startDay = new Date(startDate);
+                  const endDay = new Date(endDate);
+                  const days = Math.max(
+                    1,
+                    Math.ceil((endDay - startDay) / (1000 * 60 * 60 * 24))
+                  );
+                  const basePrice = item.price * qty * days;
+                  const serviceCharge = Math.round(
+                    basePrice * SERVICE_CHARGE_RATE
+                  );
+                  const total = basePrice + serviceCharge;
+
+                  return (
+                    <>
+                      <div className="flex justify-between text-base">
+                        <span className="text-gray-400">Item Price:</span>
+                        <span className="font-semibold text-white">
+                          ₦{item.price.toLocaleString()} × {qty}{" "}
+                          {qty > 1 ? "items" : "item"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-base">
+                        <span className="text-gray-400">Duration:</span>
+                        <span className="font-semibold text-white">
+                          {days} {days > 1 ? "days" : "day"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-base">
+                        <span className="text-gray-400">Subtotal:</span>
+                        <span className="font-semibold text-white">
+                          ₦{basePrice.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-base">
+                        <span className="text-gray-400">
+                          Service Charge (10%):
+                        </span>
+                        <span className="font-semibold text-blue-300">
+                          ₦{serviceCharge.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="border-t border-gray-700 my-2 pt-4 flex justify-between font-bold text-xl">
+                        <span className="text-gray-300">Total:</span>
+                        <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                          ₦{total.toLocaleString()}
+                        </span>
+                      </div>
+                    </>
+                  );
+                })()}
 
                 <div className="pt-4">
                   <button

@@ -28,7 +28,7 @@ export default function ProfileDetails() {
     try {
       setIsLoading(true);
       const { data, error } = await supabase
-        .from("profiles")
+        .from("profile")
         .select("*")
         .eq("id", user.id)
         .single();
@@ -115,7 +115,7 @@ export default function ProfileDetails() {
       }
 
       const { error } = await supabase
-        .from("profiles")
+        .from("profile")
         .update({
           full_name: formData.fullName,
           phone: formData.phone,

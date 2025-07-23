@@ -1,6 +1,53 @@
 import { supabase } from "../lib/supabase";
 import { createNotification } from "./apiNotification";
 
+// Calculate late fees for returned items
+// Rate is 150% of daily price for each day late
+export async function calculateLateFees(bookingId) {
+  try {
+    // Get booking details with item info
+    const { data: booking, error } = await supabase
+      .from("bookings")
+      .select("*, items:item_id(*)")
+      .eq("id", bookingId)
+      .single();
+
+    if (error) throw error;
+
+    const endDate = new Date(booking.end_date);
+    const actualReturnDate = new Date(booking.actual_return_date || new Date());
+
+    // If returned on time, no late fee
+    if (actualReturnDate <= endDate) {
+      return { lateFee: 0, daysLate: 0 };
+    }
+
+    // Calculate days late (rounded up)
+    const daysLate = Math.ceil(
+      (actualReturnDate - endDate) / (1000 * 60 * 60 * 24)
+    );
+
+    // Calculate late fee (150% of daily rate per day)
+    const dailyRate = booking.items.price;
+    const lateFeeRate = 1.5; // 150%
+    const lateFee = Math.round(daysLate * dailyRate * lateFeeRate);
+
+    // Update booking with late fee info
+    await supabase
+      .from("bookings")
+      .update({
+        late_fee: lateFee,
+        days_late: daysLate,
+      })
+      .eq("id", bookingId);
+
+    return { lateFee, daysLate };
+  } catch (error) {
+    console.error("Error calculating late fees:", error);
+    return { lateFee: 0, daysLate: 0 };
+  }
+}
+
 // Create a new booking
 export async function createBooking({
   item_id,
@@ -117,19 +164,30 @@ export async function createBooking({
 
 // Get bookings for a user (renter)
 export async function getBookingsByRenter(renterId) {
-  const { data, error } = await supabase
-    .from("bookings")
-    .select("*, item:items(*), owner:profiles(*)")
-    .eq("renter_id", renterId);
-  if (error) throw error;
-  return data;
+  try {
+    // First attempt with 'items' join
+    const { data, error } = await supabase
+      .from("bookings")
+      .select("*, items(*), owner:profile(*)")
+      .eq("renter_id", renterId);
+
+    if (error) throw error;
+
+    // Log for debugging
+    console.log(`Found ${data?.length || 0} bookings for renter ${renterId}`);
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching renter bookings:", error);
+    throw error;
+  }
 }
 
 // Get bookings for an item
 export async function getBookingsByItem(itemId) {
   const { data, error } = await supabase
     .from("bookings")
-    .select("*, renter:profiles(*), owner:profiles(*)")
+    .select("*, renter:(*), owner:profile(*)")
     .eq("item_id", itemId);
   if (error) throw error;
   return data;
@@ -166,7 +224,7 @@ export async function updateBookingStatus(bookingId, status) {
     // First get the booking details to access owner and renter IDs
     const { data: booking, error: fetchError } = await supabase
       .from("bookings")
-      .select("item_id, renter_id, owner_id")
+      .select("item_id, renter_id, owner_id, end_date")
       .eq("id", bookingId)
       .single();
 
@@ -183,10 +241,24 @@ export async function updateBookingStatus(bookingId, status) {
       `Attempting to update booking ${bookingId} with status ${status}`
     );
 
+    // If status is 'returned', record the actual return date
+    const updateData = { status };
+    if (status === "returned") {
+      updateData.actual_return_date = new Date().toISOString();
+
+      // Check if the return is late
+      const endDate = new Date(booking.end_date);
+      const currentDate = new Date();
+      if (currentDate > endDate) {
+        // Item is returned late - we'll calculate the fees after the update
+        console.log("Item returned late. Will calculate late fees.");
+      }
+    }
+
     // Update the booking status
     const { data, error, count } = await supabase
       .from("bookings")
-      .update({ status })
+      .update(updateData)
       .eq("id", bookingId)
       .select();
 
@@ -260,6 +332,48 @@ export async function updateBookingStatus(bookingId, status) {
             message,
           });
           break;
+
+        case "returned": {
+          // Calculate late fees if any
+          const { lateFee, daysLate } = await calculateLateFees(bookingId);
+
+          notificationType = "item_returned";
+          title = "Item Returned";
+
+          // Notification to owner about return
+          await createNotification({
+            user_id: booking.owner_id,
+            booking_id: bookingId,
+            type: notificationType,
+            title,
+            message: `The "${itemData?.name || "item"}" has been returned.`,
+          });
+
+          // If there's a late fee, notify the renter
+          if (lateFee > 0) {
+            await createNotification({
+              user_id: booking.renter_id,
+              booking_id: bookingId,
+              type: "late_fee",
+              title: "Late Return Fee",
+              message: `You've been charged a late fee of ₦${lateFee} for returning "${
+                itemData?.name || "item"
+              }" ${daysLate} day${daysLate !== 1 ? "s" : ""} late.`,
+            });
+          } else {
+            // Thank the renter for on-time return
+            await createNotification({
+              user_id: booking.renter_id,
+              booking_id: bookingId,
+              type: "return_confirmed",
+              title: "Return Confirmed",
+              message: `Thank you for returning "${
+                itemData?.name || "item"
+              }" on time.`,
+            });
+          }
+          break;
+        }
 
         case "rejected":
           notificationType = "booking_rejected";

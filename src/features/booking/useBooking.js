@@ -12,10 +12,11 @@ export function useCreateBooking() {
 
   return useMutation({
     mutationFn: createBooking,
-    onSuccess: () => {
+    onSuccess: (data) => {
       // Invalidate queries that might be affected by this booking
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
       queryClient.invalidateQueries({ queryKey: ["unreadNotificationCount"] });
+      return data; // Return data for further use in the component
     },
   });
 }
@@ -25,6 +26,9 @@ export function useBookingsByRenter(renterId) {
     queryKey: ["bookings", "renter", renterId],
     queryFn: () => getBookingsByRenter(renterId),
     enabled: !!renterId,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    staleTime: 60000, // 1 minute
   });
 }
 

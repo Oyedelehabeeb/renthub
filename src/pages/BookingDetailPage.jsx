@@ -346,6 +346,17 @@ export default function BookingDetailPage() {
               </div>
             )}
 
+          {/* Return button for active/confirmed bookings */}
+          {(isAdmin || booking.owner_id === user?.id) &&
+            (booking.status === "active" || booking.status === "confirmed") && (
+              <Button
+                onClick={() => handleStatusUpdate("returned")}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Mark as Returned
+              </Button>
+            )}
+
           {/* Cancel button for active bookings */}
           {(isAdmin || booking.renter_id === user?.id) &&
             (booking.status === "confirmed" ||
