@@ -17,6 +17,7 @@ import AdminPages from "./pages/AdminPages";
 import NotificationsPage from "./pages/NotificationsPage";
 import NotificationTester from "./components/NotificationTester";
 import ProfilePage from "./pages/ProfilePage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
   const queryClient = new QueryClient();
@@ -26,7 +27,13 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          <Route element={<AppLayout />}>
+          <Route
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route path="/" element={<HomePage />} />
             <Route path="/booking" element={<BookingPage />} />
             <Route path="/item/:id" element={<ItemPage />} />
