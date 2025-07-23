@@ -5,6 +5,8 @@ import {
   getMonthlyStats,
   checkIsAdmin,
   updateBookingStatus,
+  getAllUsers,
+  updateUserAdminStatus,
 } from "../../services/apiAdmin";
 
 export function useAdminCheck() {
@@ -67,5 +69,24 @@ export function useMonthlyStats() {
   return useQuery({
     queryKey: ["admin-monthly-stats"],
     queryFn: getMonthlyStats,
+  });
+}
+
+export function useGetAllUsers() {
+  return useQuery({
+    queryKey: ["admin-users"],
+    queryFn: () => getAllUsers(),
+  });
+}
+
+export function useUpdateUserAdminStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userId, isAdmin }) => updateUserAdminStatus(userId, isAdmin),
+    onSuccess: () => {
+      // Invalidate and refetch users
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+    },
   });
 }

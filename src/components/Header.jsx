@@ -93,7 +93,7 @@ export default function Header() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="font-medium">
+                  <span className="text-white font-medium">
                     {user?.user_metadata?.fullName.charAt(0).toUpperCase()}
                   </span>
                 )}
@@ -170,7 +170,7 @@ export default function Header() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <span className="text-gray-600 font-medium">
+                        <span className="text-white font-medium">
                           {user.user_metadata?.fullName.charAt(0).toUpperCase()}
                         </span>
                       )}

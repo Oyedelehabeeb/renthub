@@ -15,6 +15,8 @@ import {
   useBookingStats,
   useMonthlyStats,
   useUpdateBookingStatus,
+  useGetAllUsers,
+  useUpdateUserAdminStatus,
 } from "./useAdmin";
 import { useUnreadNotificationCount } from "../notifications/useNotification";
 // Table components using built-in HTML elements with styling
@@ -70,8 +72,11 @@ const AdminDashboard = () => {
   });
   const [filterStatus, setFilterStatus] = useState("all");
   const [dateRange, setDateRange] = useState({ start: null, end: null });
+  const [userSearchTerm, setUserSearchTerm] = useState("");
   const { mutate: updateBookingStatus } = useUpdateBookingStatus();
   const { data: unreadNotificationCount = 0 } = useUnreadNotificationCount();
+  const { mutate: updateUserAdmin } = useUpdateUserAdminStatus();
+  const { data: usersData = [], isLoading: isLoadingUsers } = useGetAllUsers();
 
   // Check if user is admin
   const { isLoading: isCheckingAdmin, isError: isAdminError } = useAdminCheck();
@@ -94,6 +99,9 @@ const AdminDashboard = () => {
     status: filterStatus === "all" ? null : filterStatus,
   });
 
+  // Debug booking data
+  console.log("Bookings data:", bookingsData);
+
   const {
     data: stats = {
       totalBookings: 0,
@@ -103,6 +111,9 @@ const AdminDashboard = () => {
     },
     isLoading: isLoadingStats,
   } = useBookingStats();
+
+  // Debug stats data
+  console.log("Stats data:", stats);
   const { data: monthlyStats = [], isLoading: isLoadingMonthly } =
     useMonthlyStats();
 
@@ -136,12 +147,18 @@ const AdminDashboard = () => {
 
   // Loading state
   const isLoading =
-    isCheckingAdmin || isLoadingBookings || isLoadingStats || isLoadingMonthly;
+    isCheckingAdmin ||
+    isLoadingBookings ||
+    isLoadingStats ||
+    isLoadingMonthly ||
+    isLoadingUsers;
 
   const maxMonthCount = Math.max(...monthlyStats.map((item) => item.count));
   const maxMonthRevenue = Math.max(...monthlyStats.map((item) => item.revenue));
 
-  const filteredBookings = bookingsData.bookings.filter(
+  // Make sure bookings array exists before filtering
+  const bookings = bookingsData?.bookings || [];
+  const filteredBookings = bookings.filter(
     (booking) =>
       booking.item?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       booking.renter?.full_name
@@ -193,7 +210,7 @@ const AdminDashboard = () => {
                     Total Bookings
                   </p>
                   <p className="text-2xl font-bold text-white">
-                    {stats.totalBookings}
+                    {stats?.totalBookings || 0}
                   </p>
                 </div>
                 <Calendar className="h-8 w-8 text-blue-400" />
@@ -344,19 +361,23 @@ const AdminDashboard = () => {
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Calendar className="w-5 h-5" />
-              All Bookings ({bookingsData.totalCount})
+              All Bookings
+              <span className="text-blue-400">
+                ({bookingsData?.totalCount || bookingsData.bookings.length || 0}
+                )
+              </span>
             </CardTitle>
-            <div className="flex items-center justify-between gap-4">
-              <div className="relative flex-1 max-w-sm">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="relative w-full md:max-w-sm">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
                   placeholder="Search bookings..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-gray-800 border-gray-700 text-white"
+                  className="pl-10 bg-gray-800 border-gray-700 text-white w-full"
                 />
               </div>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3 w-full md:w-auto">
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
@@ -369,28 +390,35 @@ const AdminDashboard = () => {
                   <option value="pending">Pending</option>
                   <option value="cancelled">Cancelled</option>
                 </select>
-                <Input
-                  type="date"
-                  value={dateRange.start || ""}
-                  onChange={(e) =>
-                    setDateRange((prev) => ({ ...prev, start: e.target.value }))
-                  }
-                  className="bg-gray-800 border-gray-700 text-white w-auto"
-                />
-                <Input
-                  type="date"
-                  value={dateRange.end || ""}
-                  onChange={(e) =>
-                    setDateRange((prev) => ({ ...prev, end: e.target.value }))
-                  }
-                  className="bg-gray-800 border-gray-700 text-white w-auto"
-                />
+                <div className="flex gap-2 flex-grow md:flex-grow-0">
+                  <Input
+                    type="date"
+                    value={dateRange.start || ""}
+                    onChange={(e) =>
+                      setDateRange((prev) => ({
+                        ...prev,
+                        start: e.target.value,
+                      }))
+                    }
+                    className="bg-gray-800 border-gray-700 text-white w-full md:w-auto"
+                    placeholder="Start date"
+                  />
+                  <Input
+                    type="date"
+                    value={dateRange.end || ""}
+                    onChange={(e) =>
+                      setDateRange((prev) => ({ ...prev, end: e.target.value }))
+                    }
+                    className="bg-gray-800 border-gray-700 text-white w-full md:w-auto"
+                    placeholder="End date"
+                  />
+                </div>
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="rounded-md border border-gray-700">
-              <table className="w-full">
+            <div className="rounded-md border border-gray-700 overflow-x-auto">
+              <table className="w-full min-w-[700px]">
                 <thead>
                   <tr className="border-b border-gray-700 hover:bg-gray-800/50">
                     <th
@@ -587,7 +615,7 @@ const AdminDashboard = () => {
                     ))}
                 </tbody>
               </table>
-              <div className="mt-4 flex items-center justify-between px-4">
+              <div className="mt-4 flex flex-col md:flex-row items-start md:items-center justify-between px-4 gap-4">
                 <div className="text-sm text-gray-400">
                   Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
                   {Math.min(
@@ -596,7 +624,7 @@ const AdminDashboard = () => {
                   )}{" "}
                   of {filteredBookings.length} bookings
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -608,7 +636,7 @@ const AdminDashboard = () => {
                   >
                     Previous
                   </Button>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     {Array.from(
                       {
                         length: Math.ceil(
@@ -657,7 +685,127 @@ const AdminDashboard = () => {
               </div>
             </div>
           </CardContent>
-        </Card>{" "}
+        </Card>
+
+        {/* User Management Section */}
+        <Card className="bg-gray-900/50 border-gray-700">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <User className="w-5 h-5" />
+              User Management
+              <span className="text-blue-400">({usersData?.length || 0})</span>
+            </CardTitle>
+            <div className="flex items-center justify-between gap-4">
+              <div className="relative w-full md:max-w-sm">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Search users..."
+                  value={userSearchTerm}
+                  onChange={(e) => setUserSearchTerm(e.target.value)}
+                  className="pl-10 bg-gray-800 border-gray-700 text-white w-full"
+                />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="rounded-md border border-gray-700 overflow-x-auto">
+              <table className="w-full min-w-[700px]">
+                <thead>
+                  <tr className="border-b border-gray-700 hover:bg-gray-800/50">
+                    <th className="text-left py-3 px-4 text-gray-300 font-medium">
+                      Avatar
+                    </th>
+                    <th className="text-left py-3 px-4 text-gray-300 font-medium">
+                      Name
+                    </th>
+                    <th className="text-left py-3 px-4 text-gray-300 font-medium">
+                      Email
+                    </th>
+                    <th className="text-left py-3 px-4 text-gray-300 font-medium">
+                      Joined
+                    </th>
+                    <th className="text-left py-3 px-4 text-gray-300 font-medium">
+                      Admin Status
+                    </th>
+                    <th className="text-left py-3 px-4 text-gray-300 font-medium">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {usersData
+                    .filter(
+                      (user) =>
+                        user.full_name
+                          ?.toLowerCase()
+                          .includes(userSearchTerm.toLowerCase()) ||
+                        user.email
+                          ?.toLowerCase()
+                          .includes(userSearchTerm.toLowerCase())
+                    )
+                    .map((user) => (
+                      <tr
+                        key={user.id}
+                        className="border-b border-gray-700 hover:bg-gray-800/50"
+                      >
+                        <td className="py-3 px-4 text-gray-300">
+                          <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-800 flex items-center justify-center">
+                            {user.avatar_url ? (
+                              <img
+                                src={user.avatar_url}
+                                alt={user.full_name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <User className="w-5 h-5 text-gray-400" />
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-gray-300">
+                          <div className="font-medium">
+                            {user.full_name || "Unknown"}
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-gray-300">
+                          {user.email}
+                        </td>
+                        <td className="py-3 px-4 text-gray-300">
+                          {new Date(user.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="py-3 px-4 text-gray-300">
+                          {user.is_admin ? (
+                            <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                              Admin
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30">
+                              User
+                            </Badge>
+                          )}
+                        </td>
+                        <td className="py-3 px-4">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              updateUserAdmin({
+                                userId: user.id,
+                                isAdmin: !user.is_admin,
+                              });
+                            }}
+                            className="border-gray-600 text-gray-300 hover:bg-gray-800"
+                          >
+                            {user.is_admin ? "Remove Admin" : "Make Admin"}
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Booking Details Modal */}
         {selectedBooking && (
           <Dialog

@@ -119,6 +119,13 @@ export async function getBookingsWithDetails({
     throw new Error("Failed to fetch bookings");
   }
 
+  console.log("Returning bookings data:", {
+    bookingsCount: bookings.length,
+    count,
+    page,
+    totalPages: Math.ceil(count / limit),
+  });
+
   return {
     bookings: bookings.map((booking) => ({
       ...booking,
@@ -127,9 +134,9 @@ export async function getBookingsWithDetails({
         image: booking.item?.image_url || null,
       },
     })),
-    totalCount: count,
+    totalCount: count || bookings.length,
     currentPage: page,
-    totalPages: Math.ceil(count / limit),
+    totalPages: Math.ceil((count || bookings.length) / limit),
   };
 }
 
@@ -157,22 +164,51 @@ export async function getBookingStats() {
   const today = new Date().toISOString();
 
   // Get total bookings count
-  const { count: totalBookings, error: totalError } = await supabase
-    .from("bookings")
-    .select("*", { count: "exact" });
+  const {
+    count: totalBookings,
+    error: totalError,
+    data: bookingsData,
+  } = await supabase.from("bookings").select("*", { count: "exact" });
+
+  // Debug booking counts
+  console.log("Booking stats query results:", {
+    totalBookings,
+    bookingsCount: bookingsData?.length,
+    totalError,
+  });
 
   // Get active bookings (confirmed or active status)
-  const { count: activeBookings, error: activeError } = await supabase
+  const {
+    count: activeBookings,
+    error: activeError,
+    data: activeBookingsData,
+  } = await supabase
     .from("bookings")
     .select("*", { count: "exact" })
     .in("status", ["confirmed", "active"])
     .gte("end_date", today);
 
+  console.log("Active bookings query:", {
+    activeBookings,
+    activeBookingsCount: activeBookingsData?.length,
+    activeError,
+  });
+
   // Get pending bookings count
-  const { count: pendingBookings, error: pendingError } = await supabase
+  const {
+    count: pendingBookings,
+    error: pendingError,
+    data: pendingBookingsData,
+  } = await supabase
     .from("bookings")
     .select("*", { count: "exact" })
     .eq("status", "pending");
+
+  console.log("Pending bookings query:", {
+    pendingBookings,
+    pendingBookingsCount: pendingBookingsData?.length,
+    pendingError,
+  });
 
   // Get total revenue
   const { data: revenueData, error: revenueError } = await supabase
@@ -196,10 +232,20 @@ export async function getBookingStats() {
       0
     ) || 0;
 
+  // If count is undefined but we have data, use the length of the data array
+  const finalTotalBookings =
+    totalBookings !== null ? totalBookings : bookingsData?.length || 0;
+  const finalActiveBookings =
+    activeBookings !== null ? activeBookings : activeBookingsData?.length || 0;
+  const finalPendingBookings =
+    pendingBookings !== null
+      ? pendingBookings
+      : pendingBookingsData?.length || 0;
+
   return {
-    totalBookings: totalBookings || 0,
-    activeBookings: activeBookings || 0,
-    pendingBookings: pendingBookings || 0,
+    totalBookings: finalTotalBookings,
+    activeBookings: finalActiveBookings,
+    pendingBookings: finalPendingBookings,
     totalRevenue: totalRevenue,
   };
 }
@@ -242,4 +288,41 @@ function processMonthlyData(bookings) {
     count: data.count,
     revenue: data.revenue,
   }));
+}
+
+// Get all authenticated users with their profiles
+export async function getAllUsers() {
+  // First get all profiles with their admin status
+  const { data: profiles, error: profileError } = await supabase
+    .from("profile")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (profileError) {
+    console.error("Error fetching user profiles:", profileError);
+    throw new Error("Failed to fetch user profiles");
+  }
+
+  return profiles;
+}
+
+// Update user admin status
+export async function updateUserAdminStatus(userId, isAdmin) {
+  try {
+    const { data, error } = await supabase
+      .from("profile")
+      .update({ is_admin: isAdmin })
+      .eq("id", userId)
+      .select();
+
+    if (error) {
+      console.error("Error updating user admin status:", error);
+      throw new Error(`Failed to update user admin status: ${error.message}`);
+    }
+
+    return data[0];
+  } catch (error) {
+    console.error("Error in apiAdmin updateUserAdminStatus:", error);
+    throw error;
+  }
 }
