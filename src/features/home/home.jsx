@@ -2,7 +2,7 @@ import { Star } from "lucide-react";
 import HeroGeometric from "../../components/HeroGeometric";
 import { Link } from "react-router-dom";
 
-// Mock data for featured items
+// Mock data for featured services
 const featuredItems = [
   {
     id: 1,
@@ -97,8 +97,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
             <div>
-              <h2 className="text-3xl font-bold mb-4">Featured Items</h2>
-              <p className="text-gray-400">Popular rentals in your area</p>
+              <h2 className="text-3xl font-bold mb-4">Featured Services</h2>
+              <p className="text-gray-400">Popular services in your area</p>
             </div>
             <Link to="/browse" className="mt-4 md:mt-0">
               <button className="px-6 py-2 border border-gray-600 text-gray-300 rounded-lg bg-transparent hover:bg-gray-800 transition font-medium">
@@ -108,19 +108,19 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredItems.map((item) => (
-              <Link to={`/item/${item.id}`} key={item.id}>
+            {featuredItems.map((service) => (
+              <Link to={`/service/${service.id}`} key={service.id}>
                 <div className="bg-gray-900 rounded-xl overflow-hidden border border-gray-800 hover:border-blue-600/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-900/20 group h-full">
                   <div className="relative h-48 overflow-hidden">
                     <img
-                      src={item.image_url}
-                      alt={item.name}
+                      src={service.image_url}
+                      alt={service.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     <div className="absolute top-3 right-3 bg-black/70 px-2 py-1 rounded text-sm backdrop-blur-sm">
                       <div className="flex items-center">
                         <Star className="h-4 w-4 text-yellow-400 mr-1 fill-yellow-400" />
-                        <span>{item.rating}</span>
+                        <span>{service.rating}</span>
                       </div>
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent h-20" />
@@ -128,18 +128,18 @@ export default function Home() {
                   <div className="p-4">
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="font-bold text-lg text-white line-clamp-1">
-                        {item.name}
+                        {service.name}
                       </h3>
                       <span className="text-sm bg-gradient-to-r from-blue-900/50 to-purple-900/50 text-blue-300 px-2 py-0.5 rounded-full border border-blue-700/30">
-                        {item.category}
+                        {service.category}
                       </span>
                     </div>
                     <p className="text-gray-400 text-sm mb-4 line-clamp-2">
-                      {item.description}
+                      {service.description}
                     </p>
                     <div className="flex justify-between items-center">
                       <span className="font-bold text-lg bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                        ₦{item.price.toLocaleString()}
+                        ₦{service.price.toLocaleString()}
                       </span>
                       <span className="text-xs bg-gray-800 px-2 py-1 rounded text-gray-300 border border-gray-700">
                         Per event

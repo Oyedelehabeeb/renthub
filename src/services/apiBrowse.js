@@ -1,7 +1,7 @@
 import { supabase } from "../lib/supabase";
 
-export async function getItems() {
-    const {data, error} = await supabase.from("items").select("*")
+export async function getServices() {
+    const {data, error} = await supabase.from("services").select("*")
     if (error) throw new Error(error.message);
     return data;
 }

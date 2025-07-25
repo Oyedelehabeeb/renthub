@@ -1,36 +1,38 @@
 import { supabase } from "../lib/supabase";
 import { createNotification } from "./apiNotification";
 
-// Calculate late fees for returned items
-// Rate is 150% of daily price for each day late
+// Calculate additional fees for services that exceeded their scheduled period
+// Rate is 150% of daily price for each day beyond the schedule
 export async function calculateLateFees(bookingId) {
   try {
-    // Get booking details with item info
+    // Get booking details with service info
     const { data: booking, error } = await supabase
       .from("bookings")
-      .select("*, items:item_id(*)")
+      .select("*, services:service_id(*)")
       .eq("id", bookingId)
       .single();
 
     if (error) throw error;
 
     const endDate = new Date(booking.end_date);
-    const actualReturnDate = new Date(booking.actual_return_date || new Date());
+    const actualCompletionDate = new Date(
+      booking.actual_completion_date || new Date()
+    );
 
-    // If returned on time, no late fee
-    if (actualReturnDate <= endDate) {
+    // If completed on time, no additional fee
+    if (actualCompletionDate <= endDate) {
       return { lateFee: 0, daysLate: 0 };
     }
 
-    // Calculate days late (rounded up)
+    // Calculate days past schedule (rounded up)
     const daysLate = Math.ceil(
-      (actualReturnDate - endDate) / (1000 * 60 * 60 * 24)
+      (actualCompletionDate - endDate) / (1000 * 60 * 60 * 24)
     );
 
-    // Calculate late fee (150% of daily rate per day)
-    const dailyRate = booking.items.price;
-    const lateFeeRate = 1.5; // 150%
-    const lateFee = Math.round(daysLate * dailyRate * lateFeeRate);
+    // Calculate additional fee (150% of daily rate per day)
+    const dailyRate = booking.services.price;
+    const additionalFeeRate = 1.5; // 150%
+    const lateFee = Math.round(daysLate * dailyRate * additionalFeeRate);
 
     // Update booking with late fee info
     await supabase
@@ -50,9 +52,9 @@ export async function calculateLateFees(bookingId) {
 
 // Create a new booking
 export async function createBooking({
-  item_id,
-  renter_id,
-  owner_id,
+  service_id,
+  client_id,
+  provider_id,
   start_date,
   end_date,
   total_price,
@@ -64,9 +66,9 @@ export async function createBooking({
       .from("bookings")
       .insert([
         {
-          item_id,
-          renter_id,
-          owner_id,
+          service_id,
+          client_id,
+          provider_id,
           start_date,
           end_date,
           total_price,
@@ -89,58 +91,58 @@ export async function createBooking({
     const createdBooking = data[0];
 
     try {
-      // Get item details for notification
-      const { data: itemData, error: itemError } = await supabase
-        .from("items")
+      // Get service details for notification
+      const { data: serviceData, error: serviceError } = await supabase
+        .from("services")
         .select("name")
-        .eq("id", item_id)
+        .eq("id", service_id)
         .single();
 
-      if (itemError) {
+      if (serviceError) {
         console.error(
-          "Error fetching item details for notification:",
-          itemError
+          "Error fetching service details for notification:",
+          serviceError
         );
       }
 
-      // Get renter details for notification
-      const { data: renterData, error: renterError } = await supabase
+      // Get client details for notification
+      const { data: clientData, error: clientError } = await supabase
         .from("profile")
         .select("full_name")
-        .eq("id", renter_id)
+        .eq("id", client_id)
         .single();
 
-      if (renterError) {
+      if (clientError) {
         console.error(
-          "Error fetching renter details for notification:",
-          renterError
+          "Error fetching client details for notification:",
+          clientError
         );
       }
 
       console.log("Creating notification with data:", {
-        user_id: owner_id,
+        user_id: provider_id,
         booking_id: createdBooking.id,
         type: "booking_request",
         title: "New Booking Request",
         message: `${
-          renterData?.full_name || "Someone"
+          clientData?.full_name || "Someone"
         } has requested to book your "${
-          itemData?.name || "item"
+          serviceData?.name || "service"
         }" from ${new Date(start_date).toLocaleDateString()} to ${new Date(
           end_date
         ).toLocaleDateString()}.`,
       });
 
-      // Create notification for the owner
+      // Create notification for the provider
       const notification = await createNotification({
-        user_id: owner_id,
+        user_id: provider_id,
         booking_id: createdBooking.id,
         type: "booking_request",
         title: "New Booking Request",
         message: `${
-          renterData?.full_name || "Someone"
+          clientData?.full_name || "Someone"
         } has requested to book your "${
-          itemData?.name || "item"
+          serviceData?.name || "service"
         }" from ${new Date(start_date).toLocaleDateString()} to ${new Date(
           end_date
         ).toLocaleDateString()}.`,
@@ -162,33 +164,33 @@ export async function createBooking({
   }
 }
 
-// Get bookings for a user (renter)
-export async function getBookingsByRenter(renterId) {
+// Get bookings for a user (client)
+export async function getBookingsByClient(clientId) {
   try {
-    // First attempt with 'items' join
+    // First attempt with 'services' join
     const { data, error } = await supabase
       .from("bookings")
-      .select("*, items(*), owner:profile(*)")
-      .eq("renter_id", renterId);
+      .select("*, services(*), provider:profile(*)")
+      .eq("client_id", clientId);
 
     if (error) throw error;
 
     // Log for debugging
-    console.log(`Found ${data?.length || 0} bookings for renter ${renterId}`);
+    console.log(`Found ${data?.length || 0} bookings for client ${clientId}`);
 
     return data;
   } catch (error) {
-    console.error("Error fetching renter bookings:", error);
+    console.error("Error fetching client bookings:", error);
     throw error;
   }
 }
 
-// Get bookings for an item
-export async function getBookingsByItem(itemId) {
+// Get bookings for a service
+export async function getBookingsByService(serviceId) {
   const { data, error } = await supabase
     .from("bookings")
-    .select("*, renter:(*), owner:profile(*)")
-    .eq("item_id", itemId);
+    .select("*, client:(*), provider:profile(*)")
+    .eq("service_id", serviceId);
   if (error) throw error;
   return data;
 }
@@ -198,7 +200,7 @@ export async function getBooking(id) {
   try {
     const { data, error } = await supabase
       .from("bookings")
-      .select("*, item:items(*), renter:profile(*), owner:profile(*)")
+      .select("*, service:services(*), client:profile(*), provider:profile(*)")
       .eq("id", id)
       .single();
 
@@ -221,10 +223,10 @@ export async function getBooking(id) {
 // Update booking status
 export async function updateBookingStatus(bookingId, status) {
   try {
-    // First get the booking details to access owner and renter IDs
+    // First get the booking details to access provider and client IDs
     const { data: booking, error: fetchError } = await supabase
       .from("bookings")
-      .select("item_id, renter_id, owner_id, end_date")
+      .select("service_id, client_id, provider_id, end_date")
       .eq("id", bookingId)
       .single();
 
@@ -241,17 +243,19 @@ export async function updateBookingStatus(bookingId, status) {
       `Attempting to update booking ${bookingId} with status ${status}`
     );
 
-    // If status is 'returned', record the actual return date
+    // If status is 'completed', record the actual completion date
     const updateData = { status };
-    if (status === "returned") {
-      updateData.actual_return_date = new Date().toISOString();
+    if (status === "completed") {
+      updateData.actual_completion_date = new Date().toISOString();
 
-      // Check if the return is late
+      // Check if the service completion is late
       const endDate = new Date(booking.end_date);
       const currentDate = new Date();
       if (currentDate > endDate) {
-        // Item is returned late - we'll calculate the fees after the update
-        console.log("Item returned late. Will calculate late fees.");
+        // Service completed after schedule - we'll calculate the additional fees after the update
+        console.log(
+          "Service completed after schedule. Will calculate additional fees."
+        );
       }
     }
 
@@ -296,18 +300,18 @@ export async function updateBookingStatus(bookingId, status) {
 
     // Process notifications
     try {
-      // Get item details for notification
-      const { data: itemData } = await supabase
-        .from("items")
+      // Get service details for notification
+      const { data: serviceData } = await supabase
+        .from("services")
         .select("name")
-        .eq("id", booking.item_id)
+        .eq("id", booking.service_id)
         .single();
 
-      // Get owner details for notification
-      const { data: ownerData } = await supabase
+      // Get provider details for notification
+      const { data: providerData } = await supabase
         .from("profile")
         .select("full_name")
-        .eq("id", booking.owner_id)
+        .eq("id", booking.provider_id)
         .single();
 
       let notificationType = "";
@@ -320,12 +324,12 @@ export async function updateBookingStatus(bookingId, status) {
           notificationType = "booking_approved";
           title = "Booking Approved";
           message = `${
-            ownerData?.full_name || "Owner"
-          } has approved your booking for "${itemData?.name || "item"}".`;
+            providerData?.full_name || "Provider"
+          } has approved your booking for "${serviceData?.name || "service"}".`;
 
-          // Send notification to renter
+          // Send notification to client
           await createNotification({
-            user_id: booking.renter_id,
+            user_id: booking.client_id,
             booking_id: bookingId,
             type: notificationType,
             title,
@@ -333,43 +337,54 @@ export async function updateBookingStatus(bookingId, status) {
           });
           break;
 
-        case "returned": {
+        case "completed": {
           // Calculate late fees if any
           const { lateFee, daysLate } = await calculateLateFees(bookingId);
 
-          notificationType = "item_returned";
-          title = "Item Returned";
+          notificationType = "service_completed";
+          title = "Service Completed";
 
-          // Notification to owner about return
+          // Get service details for notification
+          const { data: serviceData } = await supabase
+            .from("services")
+            .select("name")
+            .eq("id", booking.service_id)
+            .single();
+
+          // Notification to provider about completion
           await createNotification({
-            user_id: booking.owner_id,
+            user_id: booking.provider_id,
             booking_id: bookingId,
             type: notificationType,
             title,
-            message: `The "${itemData?.name || "item"}" has been returned.`,
+            message: `The "${
+              serviceData?.name || "service"
+            }" has been completed.`,
           });
 
-          // If there's a late fee, notify the renter
+          // If there's an additional fee, notify the client
           if (lateFee > 0) {
             await createNotification({
-              user_id: booking.renter_id,
+              user_id: booking.client_id,
               booking_id: bookingId,
-              type: "late_fee",
-              title: "Late Return Fee",
-              message: `You've been charged a late fee of ₦${lateFee} for returning "${
-                itemData?.name || "item"
-              }" ${daysLate} day${daysLate !== 1 ? "s" : ""} late.`,
+              type: "additional_fee",
+              title: "Additional Service Fee",
+              message: `You've been charged an additional fee of ₦${lateFee} because "${
+                serviceData?.name || "service"
+              }" exceeded the scheduled period by ${daysLate} day${
+                daysLate !== 1 ? "s" : ""
+              }.`,
             });
           } else {
-            // Thank the renter for on-time return
+            // Thank the client for completing the service
             await createNotification({
-              user_id: booking.renter_id,
+              user_id: booking.client_id,
               booking_id: bookingId,
-              type: "return_confirmed",
-              title: "Return Confirmed",
-              message: `Thank you for returning "${
-                itemData?.name || "item"
-              }" on time.`,
+              type: "service_completed",
+              title: "Service Completed",
+              message: `Thank you for using "${
+                serviceData?.name || "service"
+              }". We hope you were satisfied with our service.`,
             });
           }
           break;
@@ -379,12 +394,12 @@ export async function updateBookingStatus(bookingId, status) {
           notificationType = "booking_rejected";
           title = "Booking Rejected";
           message = `${
-            ownerData?.full_name || "Owner"
-          } has rejected your booking for "${itemData?.name || "item"}".`;
+            providerData?.full_name || "Service Provider"
+          } has rejected your booking for "${serviceData?.name || "service"}".`;
 
-          // Send notification to renter
+          // Send notification to client
           await createNotification({
-            user_id: booking.renter_id,
+            user_id: booking.client_id,
             booking_id: bookingId,
             type: notificationType,
             title,
@@ -398,25 +413,25 @@ export async function updateBookingStatus(bookingId, status) {
           title = "Booking Cancelled";
 
           // Send notification to both parties
-          // To renter
+          // To client
           await createNotification({
-            user_id: booking.renter_id,
+            user_id: booking.client_id,
             booking_id: bookingId,
             type: notificationType,
             title,
             message: `Your booking for "${
-              itemData?.name || "item"
+              serviceData?.name || "service"
             }" has been cancelled.`,
           });
 
-          // To owner
+          // To provider
           await createNotification({
-            user_id: booking.owner_id,
+            user_id: booking.provider_id,
             booking_id: bookingId,
             type: notificationType,
             title,
             message: `A booking for your "${
-              itemData?.name || "item"
+              serviceData?.name || "service"
             }" has been cancelled.`,
           });
           break;

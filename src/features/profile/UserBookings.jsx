@@ -17,7 +17,6 @@ const statusColors = {
   confirmed: "bg-green-500/20 text-green-400 border-green-500/30",
   active: "bg-green-500/20 text-green-400 border-green-500/30",
   completed: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  returned: "bg-blue-500/20 text-blue-400 border-blue-500/30",
   pending: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
   cancelled: "bg-red-500/20 text-red-400 border-red-500/30",
   rejected: "bg-red-500/20 text-red-400 border-red-500/30",
@@ -54,7 +53,7 @@ export default function UserBookings() {
       return ["pending", "confirmed", "active"].includes(booking.status);
     }
     if (activeTab === "completed") {
-      return ["completed", "returned"].includes(booking.status);
+      return ["completed"].includes(booking.status);
     }
     if (activeTab === "cancelled") {
       return ["cancelled", "rejected"].includes(booking.status);
@@ -62,10 +61,10 @@ export default function UserBookings() {
     return true;
   });
 
-  // Check if there are late returns
-  const hasLateReturns = bookings?.some((booking) => {
+  // Check if there are services past their scheduled end date
+  const hasExpiredServices = bookings?.some((booking) => {
     if (
-      booking.status !== "returned" &&
+      booking.status !== "completed" &&
       booking.status !== "cancelled" &&
       booking.status !== "rejected"
     ) {
@@ -89,14 +88,14 @@ export default function UserBookings() {
       <div className="p-6">
         <h2 className="text-2xl font-semibold mb-6">My Bookings</h2>
 
-        {hasLateReturns && (
+        {hasExpiredServices && (
           <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-3">
             <AlertTriangle className="text-red-400 w-5 h-5 mt-0.5 flex-shrink-0" />
             <div>
-              <h3 className="font-medium text-red-400">Late Return Warning</h3>
+              <h3 className="font-medium text-red-400">Service Period Ended</h3>
               <p className="text-sm text-gray-300">
-                You have items past their due date. Return them as soon as
-                possible to avoid additional late fees.
+                You have services past their scheduled end date. Additional fees
+                may apply.
               </p>
             </div>
           </div>
@@ -155,7 +154,7 @@ export default function UserBookings() {
               to="/browse"
               className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium px-6 py-3 rounded-lg inline-block"
             >
-              Browse Items to Rent
+              Browse Available Services
             </Link>
           </div>
         ) : (
@@ -166,7 +165,7 @@ export default function UserBookings() {
               ).toLocaleDateString();
               const endDate = new Date(booking.end_date).toLocaleDateString();
               const isLate =
-                booking.status !== "returned" &&
+                booking.status !== "completed" &&
                 booking.status !== "cancelled" &&
                 booking.status !== "rejected" &&
                 new Date() > new Date(booking.end_date);
@@ -183,7 +182,7 @@ export default function UserBookings() {
                         (booking.item || booking.items)?.image ||
                         "/placeholder.svg"
                       }
-                      alt={(booking.item || booking.items)?.name || "Item"}
+                      alt={(booking.item || booking.items)?.name || "Service"}
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -191,7 +190,7 @@ export default function UserBookings() {
                     <div className="flex justify-between flex-wrap gap-2 mb-2">
                       <h3 className="font-medium text-lg text-white">
                         {(booking.item || booking.items)?.name ||
-                          "Unnamed Item"}
+                          "Unnamed Service"}
                       </h3>
                       <Badge
                         className={
@@ -219,19 +218,19 @@ export default function UserBookings() {
                       {booking.late_fee > 0 && (
                         <div className="flex items-center gap-2 text-red-400">
                           <AlertTriangle className="h-4 w-4" />
-                          <span>Late Fee: ₦{booking.late_fee}</span>
+                          <span>Additional Fee: ₦{booking.late_fee}</span>
                         </div>
                       )}
                       {isLate && (
                         <div className="flex items-center gap-2 text-red-400">
                           <Clock className="h-4 w-4" />
-                          <span>Overdue!</span>
+                          <span>Service period ended</span>
                         </div>
                       )}
-                      {booking.status === "returned" && !booking.late_fee && (
+                      {booking.status === "completed" && !booking.late_fee && (
                         <div className="flex items-center gap-2 text-green-400">
                           <CheckCircle className="h-4 w-4" />
-                          <span>Returned on time</span>
+                          <span>Completed successfully</span>
                         </div>
                       )}
                     </div>

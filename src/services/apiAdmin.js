@@ -69,7 +69,7 @@ export async function getBookingsWithDetails({
   });
   let query = supabase.from("bookings").select(`
       *,
-      item:items!bookings_item_id_fkey(
+      service:services!bookings_service_id_fkey(
         id,
         name,
         description,
@@ -77,12 +77,12 @@ export async function getBookingsWithDetails({
         image_url,
         category
       ),
-      owner:profile!bookings_owner_id_fkey(
+      provider:profile!bookings_provider_id_fkey(
         id,
         full_name,
         avatar_url
       ),
-      renter:profile(
+      client:profile(
         id,
         full_name,
         avatar_url

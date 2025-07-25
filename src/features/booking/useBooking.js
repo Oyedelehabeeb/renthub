@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createBooking,
-  getBookingsByRenter,
-  getBookingsByItem,
+  getBookingsByClient,
+  getBookingsByService,
   getBooking,
   updateBookingStatus,
 } from "../../services/apiBooking";
@@ -21,22 +21,22 @@ export function useCreateBooking() {
   });
 }
 
-export function useBookingsByRenter(renterId) {
+export function useBookingsByRenter(clientId) {
   return useQuery({
-    queryKey: ["bookings", "renter", renterId],
-    queryFn: () => getBookingsByRenter(renterId),
-    enabled: !!renterId,
+    queryKey: ["bookings", "client", clientId],
+    queryFn: () => getBookingsByClient(clientId),
+    enabled: !!clientId,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     staleTime: 60000, // 1 minute
   });
 }
 
-export function useBookingsByItem(itemId) {
+export function useBookingsByItem(serviceId) {
   return useQuery({
-    queryKey: ["bookings", "item", itemId],
-    queryFn: () => getBookingsByItem(itemId),
-    enabled: !!itemId,
+    queryKey: ["bookings", "service", serviceId],
+    queryFn: () => getBookingsByService(serviceId),
+    enabled: !!serviceId,
   });
 }
 

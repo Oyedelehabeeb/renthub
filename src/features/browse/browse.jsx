@@ -4,27 +4,27 @@ import { Loader2, Search, SlidersHorizontal, Tag } from "lucide-react";
 import { useState } from "react";
 
 export default function Browse() {
-  const { data: items, isLoading } = useBrowse();
+  const { data: services, isLoading } = useBrowse();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
 
   // Sample categories
   const categories = [
-    "Electronics",
-    "Home & Garden",
-    "Sports",
-    "Vehicles",
-    "Fashion",
-    "Tools",
+    "Photography",
+    "Catering",
+    "Event Planning",
+    "Marketing",
+    "Design",
+    "Consulting",
   ];
 
-  const filteredItems = items?.filter((item) => {
+  const filteredServices = services?.filter((service) => {
     const matchesSearch =
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchTerm.toLowerCase());
+      service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      service.description.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesCategory = selectedCategory
-      ? item.category === selectedCategory
+      ? service.category === selectedCategory
       : true;
 
     return matchesSearch && matchesCategory;
@@ -34,7 +34,7 @@ export default function Browse() {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white">
         <Loader2 className="h-12 w-12 animate-spin text-blue-500 mb-4" />
-        <p className="text-xl">Loading available items...</p>
+        <p className="text-xl">Loading available services...</p>
       </div>
     );
   }
@@ -46,10 +46,10 @@ export default function Browse() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Browse Items
+              Browse Services
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Find the perfect item to rent for your next project or event.
+              Find the perfect service to book for your next project or event.
             </p>
           </div>
         </div>
@@ -62,7 +62,7 @@ export default function Browse() {
             <div className="relative w-full md:w-auto flex-1 max-w-md">
               <input
                 type="text"
-                placeholder="Search items..."
+                placeholder="Search services..."
                 className="w-full px-4 py-2 pl-10 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -95,24 +95,24 @@ export default function Browse() {
       {/* Items Grid */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {filteredItems?.length > 0 ? (
+          {filteredServices?.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-              {filteredItems.map((item) => (
+              {filteredServices.map((service) => (
                 <Link
-                  to={`/item/${item.id}`}
-                  key={item.id}
+                  to={`/service/${service.id}`}
+                  key={service.id}
                   className="group bg-gray-900 rounded-xl overflow-hidden border border-gray-800 hover:border-blue-500/50 transition-all duration-200 flex flex-col"
                 >
                   <div className="relative">
                     <img
-                      src={item.image_url}
-                      alt={item.name}
+                      src={service.image_url}
+                      alt={service.name}
                       className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-200"
                     />
                     <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm px-2 py-1 rounded-md flex items-center">
                       <Tag className="h-3 w-3 mr-1 text-blue-400" />
                       <span className="text-xs text-blue-100">
-                        {item.category}
+                        {service.category}
                       </span>
                     </div>
                   </div>
@@ -120,15 +120,15 @@ export default function Browse() {
                   <div className="p-4 flex-1 flex flex-col justify-between">
                     <div>
                       <h2 className="font-semibold text-lg text-white mb-2 group-hover:text-blue-400 transition-colors">
-                        {item.name}
+                        {service.name}
                       </h2>
                       <p className="text-gray-400 text-sm mb-2 line-clamp-2">
-                        {item.description}
+                        {service.description}
                       </p>
                     </div>
                     <div className="flex items-center justify-between mt-4">
                       <span className="text-gradient bg-gradient-to-r from-blue-400 to-purple-400 font-bold text-lg">
-                        ₦{item.price}/day
+                        ₦{service.price}/day
                       </span>
                       <button className="bg-gray-800 hover:bg-blue-900/40 px-3 py-1 rounded-md text-sm text-gray-300 transition-colors">
                         View
@@ -141,7 +141,7 @@ export default function Browse() {
           ) : (
             <div className="text-center py-16">
               <p className="text-2xl text-gray-400 mb-4">
-                No items match your search
+                No services match your search
               </p>
               <button
                 onClick={() => {

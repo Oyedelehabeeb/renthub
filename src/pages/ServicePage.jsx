@@ -1,9 +1,9 @@
-import ItemBooking from "../features/itemBooking/itemBooking";
+import ServiceBooking from "../features/serviceBooking/serviceBooking";
 import { Helmet } from "react-helmet-async";
 import { useParams } from "react-router-dom";
 import { useBrowse } from "../features/browse/useBrowse";
 
-export default function ItemPage() {
+export default function ServicePage() {
   const { id } = useParams();
   const { data: services } = useBrowse();
   const service = services?.find((srv) => String(srv.id) === String(id));
@@ -34,7 +34,7 @@ export default function ItemPage() {
           </span>
         </h2>
       </div>
-      <ItemBooking />
+      <ServiceBooking />
     </div>
   );
 }

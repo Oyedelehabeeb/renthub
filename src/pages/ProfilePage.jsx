@@ -7,8 +7,11 @@ export default function ProfilePage() {
   return (
     <>
       <Helmet>
-        <title>My Profile | RentHub</title>
-        <meta name="description" content="View and edit your RentHub profile" />
+        <title>My Profile | ServiceHub</title>
+        <meta
+          name="description"
+          content="View and edit your ServiceHub profile"
+        />
       </Helmet>
 
       <div className="min-h-screen bg-black text-white">

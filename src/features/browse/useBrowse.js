@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { getItems } from "../../services/apiBrowse";
+import { getServices } from "../../services/apiBrowse";
 
 export function useBrowse() {
   const { data, isLoading } = useQuery({
     queryKey: ["browse"],
-    queryFn: getItems,
+    queryFn: getServices,
   });
     return { data, isLoading };
 }

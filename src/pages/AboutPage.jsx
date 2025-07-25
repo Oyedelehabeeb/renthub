@@ -5,10 +5,10 @@ export default function AboutPage() {
   return (
     <>
       <Helmet>
-        <title>About Us | RentHub</title>
+        <title>About Us | ServiceHub</title>
         <meta
           name="description"
-          content="Learn about RentHub's mission, values, and the team behind our community-driven rental marketplace."
+          content="Learn about ServiceHub's mission, values, and the team behind our community-driven service marketplace."
         />
       </Helmet>
 

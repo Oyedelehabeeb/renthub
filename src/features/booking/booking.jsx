@@ -11,10 +11,10 @@ import { useUser } from "../authentication/useUser";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 
-// Example: service charge is 10% of item price
+// Example: service charge is 10% of service price
 const SERVICE_CHARGE_RATE = 0.1;
 
-export default function Booking({ item }) {
+export default function Booking({ item: service }) {
   const {
     register,
     handleSubmit,
@@ -36,17 +36,17 @@ export default function Booking({ item }) {
   // Watch the quantity field to update calculations in real-time
   // const quantity = watch("quantity") || 1;
 
-  // Fetch existing bookings for this item to disable booked dates
+  // Fetch existing bookings for this service to disable booked dates
   useEffect(() => {
     async function fetchBookedDates() {
-      if (!item?.id) return;
+      if (!service?.id) return;
 
       try {
         setIsLoadingDates(true);
         const { data, error } = await supabase
           .from("bookings")
           .select("start_date, end_date, status")
-          .eq("item_id", item.id)
+          .eq("service_id", service.id)
           .in("status", ["pending", "confirmed", "active"]);
 
         if (error) throw error;
@@ -74,13 +74,13 @@ export default function Booking({ item }) {
     }
 
     fetchBookedDates();
-  }, [item?.id]);
+  }, [service?.id]);
 
-  if (!item) return null;
+  if (!service) return null;
 
   const onSubmit = () => {
     if (!user) {
-      toast.error("You must be signed in to book an item.");
+      toast.error("You must be signed in to book a service.");
       return;
     }
     // UUID validation for user.id only
@@ -91,9 +91,9 @@ export default function Booking({ item }) {
       return;
     }
 
-    // Check if user is trying to book their own item
-    if (user.id === item.owner_id) {
-      toast.error("You cannot book your own item!");
+    // Check if user is trying to book their own service
+    if (user.id === service.provider_id) {
+      toast.error("You cannot book your own service!");
       return;
     }
 
@@ -101,7 +101,7 @@ export default function Booking({ item }) {
     const formData = watch();
     const qty = parseInt(formData.quantity) || 1;
 
-    // Calculate rental duration in days
+    // Calculate service duration in days
     const startDay = new Date(startDate);
     const endDay = new Date(endDate);
     const days = Math.max(
@@ -110,15 +110,15 @@ export default function Booking({ item }) {
     );
 
     // Calculate costs with quantity
-    const basePrice = item.price * qty * days;
+    const basePrice = service.price * qty * days;
     const serviceCharge = Math.round(basePrice * SERVICE_CHARGE_RATE);
     const total_price = basePrice + serviceCharge;
 
     createBooking(
       {
-        item_id: item.id,
-        renter_id: user.id,
-        owner_id: item.owner_id,
+        service_id: service.id,
+        client_id: user.id,
+        provider_id: service.provider_id,
         start_date: startDate.toISOString(),
         end_date: endDate.toISOString(),
         quantity: qty,
@@ -127,15 +127,15 @@ export default function Booking({ item }) {
       },
       {
         onSuccess: (data) => {
-          toast.success(
-            `Booking successful! Redirecting to confirmation page...`
-          );
+          // toast.success(
+          //   `Booking successful! Redirecting to confirmation page...`
+          // );
           // Navigate to the success page with booking details
           // Get form data
           const formData = watch();
           const qty = parseInt(formData.quantity) || 1;
 
-          // Calculate rental duration in days
+          // Calculate service duration in days
           const startDay = new Date(startDate);
           const endDay = new Date(endDate);
           const days = Math.max(
@@ -151,9 +151,9 @@ export default function Booking({ item }) {
                 end_date: endDate.toISOString(),
                 quantity: qty,
                 days: days,
-                item_price: item.price,
+                service_price: service.price,
                 total_price,
-                item_name: item.name,
+                service_name: service.name,
               },
             },
           });
@@ -170,7 +170,7 @@ export default function Booking({ item }) {
   return (
     <div>
       <h3 className="text-2xl md:text-3xl font-bold mb-8 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent text-center">
-        Book this item
+        Book this service
       </h3>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="flex flex-col lg:flex-row gap-8">
@@ -252,7 +252,7 @@ export default function Booking({ item }) {
                     1,
                     Math.ceil((endDay - startDay) / (1000 * 60 * 60 * 24))
                   );
-                  const basePrice = item.price * qty * days;
+                  const basePrice = service.price * qty * days;
                   const serviceCharge = Math.round(
                     basePrice * SERVICE_CHARGE_RATE
                   );
@@ -261,10 +261,10 @@ export default function Booking({ item }) {
                   return (
                     <>
                       <div className="flex justify-between text-base">
-                        <span className="text-gray-400">Item Price:</span>
+                        <span className="text-gray-400">Service Price:</span>
                         <span className="font-semibold text-white">
-                          ₦{item.price.toLocaleString()} × {qty}{" "}
-                          {qty > 1 ? "items" : "item"}
+                          ₦{service.price.toLocaleString()} × {qty}{" "}
+                          {qty > 1 ? "services" : "service"}
                         </span>
                       </div>
                       <div className="flex justify-between text-base">
@@ -308,7 +308,7 @@ export default function Booking({ item }) {
 
                   {!user && (
                     <p className="text-red-400 text-center text-sm mt-3">
-                      You must be signed in to book this item
+                      You must be signed in to book this service
                     </p>
                   )}
                 </div>

@@ -5,10 +5,10 @@ export default function BrowsePage() {
   return (
     <>
       <Helmet>
-        <title>Browse Items | RentHub</title>
+        <title>Browse Services | ServiceHub</title>
         <meta
           name="description"
-          content="Browse through our collection of items available for rent. Find tools, equipment, vehicles and more."
+          content="Browse through our collection of services available for booking. Find photography, catering, event planning and more."
         />
       </Helmet>
 

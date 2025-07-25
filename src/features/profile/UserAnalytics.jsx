@@ -18,11 +18,11 @@ export default function UserAnalytics() {
     totalBookings: 0,
     activeBookings: 0,
     totalSpent: 0,
-    lateFees: 0,
-    itemsOwned: 0,
-    itemsRented: 0,
-    averageRentalDuration: 0,
-    mostRented: null,
+    additionalFees: 0,
+    servicesProvided: 0,
+    servicesBooked: 0,
+    averageServiceDuration: 0,
+    mostBookedCategory: null,
     isLoading: true,
   });
 
@@ -39,13 +39,13 @@ export default function UserAnalytics() {
 
         if (bookingsError) throw bookingsError;
 
-        // Get items owned by user
-        const { data: ownedItems, error: itemsError } = await supabase
-          .from("items")
+        // Get services provided by user
+        const { data: ownedServices, error: servicesError } = await supabase
+          .from("services")
           .select("id")
-          .eq("owner_id", user.id);
+          .eq("provider_id", user.id);
 
-        if (itemsError) throw itemsError;
+        if (servicesError) throw servicesError;
 
         // Calculate analytics
         const activeBookings =
@@ -54,22 +54,20 @@ export default function UserAnalytics() {
           ) || [];
 
         const completedBookings =
-          bookings?.filter((b) =>
-            ["completed", "returned"].includes(b.status)
-          ) || [];
+          bookings?.filter((b) => ["completed"].includes(b.status)) || [];
 
         const totalSpent =
           bookings?.reduce(
             (sum, booking) => sum + (booking.total_price || 0),
             0
           ) || 0;
-        const lateFees =
+        const additionalFees =
           bookings?.reduce(
             (sum, booking) => sum + (booking.late_fee || 0),
             0
           ) || 0;
 
-        // Calculate average rental duration in days
+        // Calculate average service duration in days
         let totalDuration = 0;
         completedBookings.forEach((booking) => {
           const start = new Date(booking.start_date);
@@ -78,21 +76,21 @@ export default function UserAnalytics() {
           totalDuration += duration;
         });
 
-        const averageRentalDuration = completedBookings.length
+        const averageServiceDuration = completedBookings.length
           ? Math.round(totalDuration / completedBookings.length)
           : 0;
 
-        // Find most frequently rented item category
-        const itemCategories = bookings
+        // Find most frequently booked service category
+        const serviceCategories = bookings
           ?.filter((b) => b.items?.category)
           .map((b) => b.items.category);
 
-        const categoryCounts = itemCategories?.reduce((acc, category) => {
+        const categoryCounts = serviceCategories?.reduce((acc, category) => {
           acc[category] = (acc[category] || 0) + 1;
           return acc;
         }, {});
 
-        const mostRented = Object.entries(categoryCounts || {})
+        const mostBookedCategory = Object.entries(categoryCounts || {})
           .sort((a, b) => b[1] - a[1])
           .shift();
 
@@ -100,11 +98,11 @@ export default function UserAnalytics() {
           totalBookings: bookings?.length || 0,
           activeBookings: activeBookings.length,
           totalSpent,
-          lateFees,
-          itemsOwned: ownedItems?.length || 0,
-          itemsRented: completedBookings.length,
-          averageRentalDuration,
-          mostRented: mostRented ? mostRented[0] : null,
+          additionalFees,
+          servicesProvided: ownedServices?.length || 0,
+          servicesBooked: completedBookings.length,
+          averageServiceDuration,
+          mostBookedCategory: mostBookedCategory ? mostBookedCategory[0] : null,
           isLoading: false,
         });
       } catch (error) {
@@ -129,7 +127,6 @@ export default function UserAnalytics() {
 
   // Using a function component with explicit class mapping
   function StatCard({ icon: Icon, label, value, color = "blue" }) {
-   
     const bgColorMap = {
       blue: "bg-blue-500/20",
       green: "bg-green-500/20",
@@ -187,8 +184,8 @@ export default function UserAnalytics() {
           />
           <StatCard
             icon={AlertTriangle}
-            label="Late Fees Paid"
-            value={`₦${analytics.lateFees.toLocaleString()}`}
+            label="Additional Fees"
+            value={`₦${analytics.additionalFees.toLocaleString()}`}
             color="red"
           />
         </div>
@@ -197,19 +194,19 @@ export default function UserAnalytics() {
           <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 col-span-1 lg:col-span-2">
             <div className="flex items-center gap-2 mb-3">
               <BarChart3 className="h-5 w-5 text-blue-400" />
-              <h3 className="font-medium">Rental Summary</h3>
+              <h3 className="font-medium">Service Summary</h3>
             </div>
             <div className="grid grid-cols-2 gap-4 mt-4">
               <div>
-                <p className="text-gray-400 text-sm">Items Rented</p>
+                <p className="text-gray-400 text-sm">Services Booked</p>
                 <p className="text-xl font-semibold text-white">
-                  {analytics.itemsRented}
+                  {analytics.servicesBooked}
                 </p>
               </div>
               <div>
-                <p className="text-gray-400 text-sm">Items Owned</p>
+                <p className="text-gray-400 text-sm">Services Provided</p>
                 <p className="text-xl font-semibold text-white">
-                  {analytics.itemsOwned}
+                  {analytics.servicesProvided}
                 </p>
               </div>
             </div>
@@ -218,22 +215,22 @@ export default function UserAnalytics() {
           <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-3">
               <CalendarCheck className="h-5 w-5 text-green-400" />
-              <h3 className="font-medium">Average Rental</h3>
+              <h3 className="font-medium">Average Duration</h3>
             </div>
-            <p className="text-gray-400 text-sm mt-4">Avg. Duration</p>
+            <p className="text-gray-400 text-sm mt-4">Avg. Service Time</p>
             <p className="text-xl font-semibold text-white">
-              {analytics.averageRentalDuration} days
+              {analytics.averageServiceDuration} days
             </p>
           </div>
 
           <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-3">
               <TrendingUp className="h-5 w-5 text-purple-400" />
-              <h3 className="font-medium">Most Rented</h3>
+              <h3 className="font-medium">Popular Category</h3>
             </div>
-            <p className="text-gray-400 text-sm mt-4">Category</p>
+            <p className="text-gray-400 text-sm mt-4">Most Booked</p>
             <p className="text-xl font-semibold text-white capitalize">
-              {analytics.mostRented || "None"}
+              {analytics.mostBookedCategory || "None"}
             </p>
           </div>
         </div>

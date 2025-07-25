@@ -80,7 +80,7 @@ export default function BookingSuccessPage() {
               <div className="flex items-start gap-3">
                 <Calendar className="text-blue-400 flex-shrink-0 mt-1" />
                 <div>
-                  <p className="text-sm text-gray-400">Rental Period</p>
+                  <p className="text-sm text-gray-400">Service Period</p>
                   <p className="text-white font-medium">
                     {startDate} to {endDate}
                   </p>
@@ -132,7 +132,7 @@ export default function BookingSuccessPage() {
                   <path d="M12 12h.01"></path>
                 </svg>
                 <div>
-                  <p className="text-sm text-gray-400">Rental Duration</p>
+                  <p className="text-sm text-gray-400">Service Duration</p>
                   <p className="text-white font-medium">
                     {booking.days || 1} {booking.days === 1 ? "day" : "days"}
                   </p>
@@ -157,18 +157,22 @@ export default function BookingSuccessPage() {
               <li className="flex items-start gap-2">
                 <ArrowRight className="text-blue-400 flex-shrink-0 mt-1 w-5 h-5" />
                 <span>
-                  Return the item on time to avoid late fees (150% of daily rate
-                  per day)
+                  Complete the service on schedule to avoid additional fees
+                  (150% of daily rate per day)
                 </span>
               </li>
               <li className="flex items-start gap-2">
                 <ArrowRight className="text-blue-400 flex-shrink-0 mt-1 w-5 h-5" />
-                <span>Handle the item with care to avoid damage charges</span>
+                <span>
+                  Follow all service terms and conditions to avoid additional
+                  charges
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <ArrowRight className="text-blue-400 flex-shrink-0 mt-1 w-5 h-5" />
                 <span>
-                  Contact the owner if you have any questions about the item
+                  Contact the service provider if you have any questions about
+                  the service
                 </span>
               </li>
             </ul>
@@ -185,7 +189,7 @@ export default function BookingSuccessPage() {
               to="/browse"
               className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 py-3 text-center"
             >
-              Browse More Items
+              Browse More Services
             </Link>
           </div>
         </div>

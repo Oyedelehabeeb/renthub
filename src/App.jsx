@@ -7,13 +7,13 @@ import { Toaster } from "react-hot-toast";
 import AppLayout from "./components/AppLayout";
 import BookingPage from "./pages/BookingPage";
 import BookingDetailPage from "./pages/BookingDetailPage";
-import ItemPage from "./pages/ItemPage";
+import ServicePage from "./pages/ServicePage";
 import BrowsePage from "./pages/BrowsePage";
 import ContactPage from "./pages/ContactPage";
 import AboutPage from "./pages/AboutPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
-import ListItemPage from "./pages/ListItemPage";
+import ListServicePage from "./pages/ListServicePage";
 import AdminPages from "./pages/AdminPages";
 import NotificationsPage from "./pages/NotificationsPage";
 import NotificationTester from "./components/NotificationTester";
@@ -40,9 +40,9 @@ export default function App() {
           >
             <Route path="/" element={<HomePage />} />
             <Route path="/booking" element={<BookingPage />} />
-            <Route path="/item/:id" element={<ItemPage />} />
+            <Route path="/service/:id" element={<ServicePage />} />
             <Route path="/browse" element={<BrowsePage />} />
-            <Route path="/list-item" element={<ListItemPage />} />
+            <Route path="/list-service" element={<ListServicePage />} />
             <Route path="/admin" element={<AdminPages />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/bookings/:id" element={<BookingDetailPage />} />
