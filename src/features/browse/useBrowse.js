@@ -6,5 +6,5 @@ export function useBrowse() {
     queryKey: ["browse"],
     queryFn: getServices,
   });
-    return { data, isLoading };
+  return { data, isLoading };
 }

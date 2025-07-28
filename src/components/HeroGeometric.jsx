@@ -142,7 +142,7 @@ export default function HeroGeometric() {
           >
             <h1 className="text-4xl sm:text-6xl md:text-8xl font-bold mb-6 md:mb-8 tracking-tight">
               <span className="bg-clip-text text-transparent bg-gradient-to-b from-white to-white/80">
-                Rent Everything
+                Find Services
               </span>
               <br />
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-white/90 to-purple-400 font-light italic">
@@ -158,8 +158,8 @@ export default function HeroGeometric() {
             animate="visible"
           >
             <p className="text-base sm:text-lg md:text-xl text-white/40 mb-12 leading-relaxed font-light tracking-wide max-w-2xl mx-auto px-4">
-              From professional equipment to everyday essentials. Quality items,
-              trusted owners, seamless experience.
+              From professional expertise to everyday solutions. Quality
+              services, trusted providers, seamless experience.
             </p>
           </motion.div>
 
@@ -178,13 +178,13 @@ export default function HeroGeometric() {
                       <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/40 w-5 h-5" />
                       <input
                         type="text"
-                        placeholder="What do you need to rent?"
+                        placeholder="What service do you need?"
                         className="pl-12 h-14 w-full bg-transparent border-0 text-white placeholder:text-white/40 text-lg focus:ring-0 focus:outline-none rounded-xl"
                       />
                     </div>
-                    <Link href="/browse">
+                    <Link to="/browse">
                       <button className="h-14 px-8 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-0">
-                        Search Items
+                        Search Services
                       </button>
                     </Link>
                   </div>
@@ -200,14 +200,14 @@ export default function HeroGeometric() {
             animate="visible"
           >
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/browse">
+              <Link to="/browse">
                 <button className="h-12 px-8 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-xl transition-all duration-300 border-0">
                   Start Browsing
                 </button>
               </Link>
-              <Link to="list-item">
+              <Link to="/list-service">
                 <button className="h-12 px-8 border border-white/[0.08] bg-white/[0.03] text-white/80 hover:bg-white/[0.08] font-medium rounded-xl backdrop-blur-sm transition-all duration-300">
-                  List Your Items
+                  List Your Services
                 </button>
               </Link>
             </div>

@@ -1,6 +1,5 @@
 import { supabase } from "../lib/supabase";
 
-
 export async function addService({
   name,
   description,

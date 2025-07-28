@@ -136,7 +136,9 @@ export default function BookingDetailPage() {
   const canViewBooking = () => {
     if (!booking || !user) return false;
     return (
-      isAdmin || booking.client_id === user.id || booking.provider_id === user.id
+      isAdmin ||
+      booking.client_id === user.id ||
+      booking.provider_id === user.id
     );
   };
 
