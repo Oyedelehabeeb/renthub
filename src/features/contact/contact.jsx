@@ -67,7 +67,7 @@ export default function Contact() {
             <h1 className="text-4xl md:text-5xl font-bold mb-6">Contact Us</h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               Have questions or need assistance? Our team is here to help you
-              get the most out of RentHub.
+              get the most out of our service platform.
             </p>
           </div>
         </div>
@@ -89,10 +89,10 @@ export default function Contact() {
                   Our support team will get back to you within 24 hours.
                 </p>
                 <a
-                  href="mailto:support@renthub.com"
+                  href="mailto:services@renthub.com"
                   className="text-blue-400 hover:text-blue-300"
                 >
-                  support@renthub.com
+                  services@renthub.com
                 </a>
               </div>
 
@@ -262,13 +262,11 @@ export default function Contact() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
-              <h3 className="font-semibold mb-3">
-                How do I list an item for rent?
-              </h3>
+              <h3 className="font-semibold mb-3">How do I list a service?</h3>
               <p className="text-gray-400">
                 Create an account, navigate to your dashboard, and click on
-                &quot;List an Item&quot;. Fill in the details about your item and set your
-                rental terms.
+                &quot;List Your Services&quot;. Fill in the details about your
+                service and set your service terms.
               </p>
             </div>
 
@@ -284,23 +282,23 @@ export default function Contact() {
 
             <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
               <h3 className="font-semibold mb-3">
-                How is the security deposit handled?
+                How is payment processing handled?
               </h3>
               <p className="text-gray-400">
-                Security deposits are held securely and released back to the
-                renter within 48 hours after the rental period ends, assuming no
-                damages.
+                Payments are processed securely when a service is booked. Funds
+                are released to the service provider within 48 hours after the
+                service is successfully completed.
               </p>
             </div>
 
             <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
               <h3 className="font-semibold mb-3">
-                What happens if an item is damaged?
+                What happens if there&apos;s an issue with a service?
               </h3>
               <p className="text-gray-400">
-                If an item is damaged, please notify us immediately. We have a
-                dispute resolution process to handle these situations fairly for
-                both parties.
+                If there&apos;s a problem with a service, please notify us
+                immediately. We have a dispute resolution process to handle
+                these situations fairly for both clients and service providers.
               </p>
             </div>
           </div>
