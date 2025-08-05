@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import About from "../features/about/About";
+import About from "../features/about/About.jsx";
 
 export default function AboutPage() {
   return (
