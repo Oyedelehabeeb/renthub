@@ -1,9 +1,9 @@
-import Home from "../features/Home/Home";
+import Home from "../features/home-feature/Home";
 
 export default function HomePage() {
   return (
     <div>
-        <Home />
+      <Home />
     </div>
-  )
+  );
 }
