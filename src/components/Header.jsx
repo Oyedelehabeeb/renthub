@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useUser } from "../features/authentication/useUser";
 import { Link } from "react-router-dom";
-import NotificationBell from "../features/notifications/NotificationBell";
+import NotificationBell from "../features/notifications/notification-bell";
 import { useSignout } from "../features/authentication/useSignout";
 import { Menu, X, ShieldCheck } from "lucide-react";
 

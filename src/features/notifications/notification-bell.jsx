@@ -28,24 +28,26 @@ export default function NotificationBell() {
     };
   }, []);
 
+  // Toggle dropdown
+  const toggleDropdown = () => {
+    setIsOpen((prevState) => !prevState);
+  };
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="relative p-1.5 text-gray-400 hover:text-white focus:outline-none"
+        onClick={toggleDropdown}
+        className="relative p-1.5 text-white hover:text-blue-400 transition-colors focus:outline-none"
         aria-label="Notifications"
       >
-        <Bell className="w-6 h-6" />
-
-        {/* Unread count badge */}
+        <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full">
+          <span className="absolute top-0 right-0 inline-flex items-center justify-center w-4 h-4 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
 
-      {/* Dropdown */}
       {isOpen && <NotificationDropdown onClose={() => setIsOpen(false)} />}
     </div>
   );
