@@ -881,7 +881,7 @@ const AdminDashboard = () => {
                     <CardHeader>
                       <CardTitle className="text-lg flex items-center gap-2">
                         <User className="w-5 h-5" />
-                        Renter Information
+                        Client Information
                       </CardTitle>
                     </CardHeader>
                     <CardContent>

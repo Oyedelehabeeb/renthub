@@ -27,7 +27,7 @@ export default function Signup() {
     <div className="min-h-screen flex items-center justify-center bg-black py-12 px-4 sm:px-6">
       <div className="w-full max-w-md bg-gray-900 rounded-2xl shadow-2xl border border-gray-800 p-6 sm:p-8">
         <h2 className="text-2xl font-bold text-center mb-8 text-white bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
-          Create your RentHub account
+          Create your ServiceHub account
         </h2>
         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div>

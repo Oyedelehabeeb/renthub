@@ -171,7 +171,7 @@ export default function Home() {
                 image:
                   "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80",
                 quote:
-                  "RentHub has transformed how I organize events. Access to quality equipment without the long-term commitment is a game-changer!",
+                  "ServiceHub has transformed how I organize events. Access to quality equipment without the long-term commitment is a game-changer!",
               },
               {
                 name: "Michael Chen",
@@ -179,7 +179,7 @@ export default function Home() {
                 image:
                   "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=80",
                 quote:
-                  "As a freelance photographer, RentHub lets me access high-end equipment when I need it. My business has grown significantly since I started using the platform.",
+                  "As a freelance photographer, ServiceHub lets me access high-end equipment when I need it. My business has grown significantly since I started using the platform.",
               },
               {
                 name: "Amara Wilson",
@@ -229,7 +229,7 @@ export default function Home() {
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold mb-4">Ready to Start Renting?</h2>
           <p className="text-xl text-gray-300 mb-8">
-            Join thousands of users who trust RentHub for their rental needs
+            Join thousands of users who trust ServiceHub for their rental needs
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/browse">

@@ -5,28 +5,28 @@ export default function About() {
     {
       name: "Alex Morgan",
       role: "CEO & Founder",
-      bio: "Alex founded RentHub with a vision to transform how people access and share resources.",
+      bio: "Alex founded ServiceHub with a vision to transform how people access and share resources.",
       image:
         "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80",
     },
     {
       name: "Sophia Chen",
       role: "Chief Product Officer",
-      bio: "Sophia oversees product strategy and ensures RentHub delivers exceptional user experiences.",
+      bio: "Sophia oversees product strategy and ensures ServiceHub delivers exceptional user experiences.",
       image:
         "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80",
     },
     {
       name: "Marcus Johnson",
       role: "CTO",
-      bio: "Marcus leads our engineering team and drives technical innovation at RentHub.",
+      bio: "Marcus leads our engineering team and drives technical innovation at ServiceHub.",
       image:
         "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80",
     },
     {
       name: "Jamie Rodriguez",
       role: "Head of Operations",
-      bio: "Jamie ensures that RentHub runs smoothly, managing day-to-day operations and logistics.",
+      bio: "Jamie ensures that ServiceHub runs smoothly, managing day-to-day operations and logistics.",
       image:
         "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=776&q=80",
     },
@@ -43,7 +43,7 @@ export default function About() {
       icon: <ShieldCheck className="h-6 w-6 text-blue-400" />,
       name: "Trust & Safety",
       description:
-        "We prioritize creating a secure platform where users can rent with confidence and peace of mind.",
+        "We prioritize creating a secure platform where users can find services with confidence and peace of mind.",
     },
     {
       icon: <Leaf className="h-6 w-6 text-blue-400" />,
@@ -55,7 +55,7 @@ export default function About() {
       icon: <Code className="h-6 w-6 text-blue-400" />,
       name: "Innovation",
       description:
-        "We continuously evolve our platform with cutting-edge technology to improve the rental experience.",
+        "We continuously evolve our platform with cutting-edge technology to improve the user experience.",
     },
   ];
 
@@ -66,11 +66,11 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              About RentHub
+              About ServiceHub
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               Transforming the way people access and share resources in a
-              community-driven rental marketplace.
+              community-driven service marketplace.
             </p>
           </div>
         </div>
@@ -84,26 +84,25 @@ export default function About() {
               <h2 className="text-3xl font-bold mb-6">Our Story</h2>
               <div className="space-y-4 text-gray-300">
                 <p>
-                  RentHub began in 2022 with a simple observation: people have
+                  ServiceHub began in 2022 with a simple observation: people have
                   items they rarely use, while others need those same items but
                   don&apos;t want to purchase them outright.
                 </p>
                 <p>
                   Our founder, Alex Morgan, experienced this firsthand when
                   moving to a new city and needing tools for a weekend project.
-                  After borrowing from a neighbor, the idea for a
-                  community-based rental platform was born.
+                  After borrowing a drill from a neighbor, the idea for a
+                  community-based service platform was born.
                 </p>
                 <p>
                   What started as a small local platform has grown into a
-                  nationwide marketplace connecting thousands of people who want
-                  to rent rather than buy, fostering community connections and
+                  nationwide marketplace connecting thousands of people who need any service, fostering community connections and
                   promoting sustainable consumption.
                 </p>
                 <p>
-                  Today, RentHub is revolutionizing access to goods by making
-                  rental easy, secure, and beneficial for both owners and
-                  renters across the country.
+                  Today, ServiceHub is revolutionizing access to goods by making
+                  finding services easy, secure, and beneficial for both providers and
+                  clients across the country.
                 </p>
               </div>
             </div>
@@ -154,8 +153,8 @@ export default function About() {
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">Meet Our Team</h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              The passionate individuals behind RentHub&apos;s mission to
-              revolutionize rental marketplaces.
+              The passionate individuals behind ServiceHub&apos;s mission to
+              revolutionize service marketplaces.
             </p>
           </div>
 
@@ -201,7 +200,7 @@ export default function About() {
             </div>
             <div className="p-6">
               <p className="text-4xl font-bold text-white mb-2">15K+</p>
-              <p className="text-xl text-gray-300">Successful Rentals</p>
+              <p className="text-xl text-gray-300">Successful Services</p>
             </div>
           </div>
         </div>
@@ -211,7 +210,7 @@ export default function About() {
       <section className="py-16">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold mb-4">
-            Join the RentHub Community
+            Join the ServiceHub Community
           </h2>
           <p className="text-xl text-gray-300 mb-8">
             Be part of the sharing economy revolution

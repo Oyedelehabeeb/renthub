@@ -5,8 +5,8 @@ export default function ProfilePage() {
   return (
     <>
       <Helmet>
-        <title>My Profile | RentHub</title>
-        <meta name="description" content="View and edit your RentHub profile" />
+        <title>My Profile | ServiceHub</title>
+        <meta name="description" content="View and edit your ServiceHub profile" />
       </Helmet>
 
       <main className="container mx-auto px-4 py-8">

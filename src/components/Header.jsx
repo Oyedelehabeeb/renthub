@@ -27,7 +27,7 @@ export default function Header() {
           <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
             <span className="text-white font-bold text-sm">R</span>
           </div>
-          <span className="text-xl font-bold text-white">RentHub</span>
+          <span className="text-xl font-bold text-white">ServiceHub</span>
         </Link>
       </div>
       {/* Mobile Menu Toggle */}

@@ -89,10 +89,10 @@ export default function Contact() {
                   Our support team will get back to you within 24 hours.
                 </p>
                 <a
-                  href="mailto:services@renthub.com"
+                  href="mailto:services@servicehub.com"
                   className="text-blue-400 hover:text-blue-300"
                 >
-                  services@renthub.com
+                  services@servicehub.com
                 </a>
               </div>
 
