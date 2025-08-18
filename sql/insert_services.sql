@@ -1,5 +1,10 @@
 -- Insert 30 different services into the services table
--- This script adds a variety of services across different categories
+-- This script first deletes existing data, then adds a variety of new services across different categories
+
+-- Delete dependent records first to avoid foreign key constraint violations
+DELETE FROM public.notifications WHERE booking_id IN (SELECT id FROM public.bookings);
+DELETE FROM public.bookings;
+DELETE FROM public.services;
 
 INSERT INTO public.services (name, description, image_url, price, category, provider_id)
 VALUES
