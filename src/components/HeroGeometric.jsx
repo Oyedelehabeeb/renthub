@@ -129,7 +129,7 @@ export default function HeroGeometric() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.03] border border-white/[0.08] mb-8 md:mb-12"
           >
             <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-xs">R</span>
+              <span className="text-white font-bold text-xs">S</span>
             </div>
             <span className="text-sm text-white/60 tracking-wide">ServiceHub</span>
           </motion.div>
